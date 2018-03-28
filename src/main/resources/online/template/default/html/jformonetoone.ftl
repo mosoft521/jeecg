@@ -31,7 +31,13 @@
 														<#-- update--end--author:zhangjiaqiang Date:20170417 for:增加校验必填项 -->
 											            <#if subTableField.operationCodesReadOnly?exists> readonly = "readonly"</#if>
 										               <#if subTableField.field_valid_type?if_exists?html != ''>
-										               datatype="${subTableField.field_valid_type?if_exists?html}"
+										               <#if subTableField.field_valid_type=='only'>
+						       		   						validType="${sub},${subTableField.field_name},${sub}[${subTableData_index}].id"
+						       		   						datatype="*"
+						       							<#else>
+					                   				 		datatype="${subTableField.field_valid_type?if_exists?html}"
+					               						</#if>
+										               
 										               <#else>
 										               <#if subTableField.type == 'int'>
 										               datatype="n" 
@@ -159,7 +165,9 @@
 													<#-- update--end--author:zhangjiaqiang Date:20170417 for:增加校验必填项 -->
 										               <#if subTableField.operationCodesReadOnly?if_exists> readonly = "readonly"
 										               <#else>
-												       onClick="inputClick(this,'${subTableField.dict_text?if_exists?html}','${subTableField.dict_table?if_exists?html}');" 
+										               <#-- update--begin--author:baiyu Date:20171031 for:popupClick支持返回多个字段 -->
+												       onClick="popupClick(this,'${subTableField.dict_text?if_exists?html}','${subTableField.dict_field?if_exists?html}','${subTableField.dict_table?if_exists?html}');" 
+												       <#-- update--end--author:baiyu Date:20171031 for:popupClick支持返回多个字段 -->
 										               </#if>
 										               <#if subTableField.field_valid_type?if_exists?html != ''>
 										               datatype="${subTableField.field_valid_type?if_exists?html}"
@@ -184,10 +192,9 @@
 										               <#else>
 						               					<#if subTableField.is_null != 'Y'>datatype="*"</#if>
 										               </#if>>
-										           <a  target="_blank" id="${sub}List[${subTableData_index}].${subTableField.field_name}_href">未上传</a>
-											  	<br>
-											   <input class="form-control" type="button" value="上传附件"
+											   <input class="ui-button" type="button" value="上传附件"
 															onclick="commonUpload(commonUploadDefaultCallBack,'${sub}List[${subTableData_index}].${subTableField.field_name}')"/>
+										           <a  target="_blank" id="${sub}List[${subTableData_index}].${subTableField.field_name}_href"></a>
 										          <#-- update--end--author:zhangjiaqiang date:20170607 for:增加对于图片和文件的支持 -->     
 											<#else>
 												<input id="${sub}[${subTableData_index}].${subTableField.field_name}" ${subTableField.extend_json?if_exists} name="${sub}[${subTableData_index}].${subTableField.field_name}" type="text"
@@ -270,7 +277,12 @@
 													<#-- update--end--author:zhangjiaqiang Date:20170417 for:增加校验必填项 -->
 									               <#if subTableField.operationCodesReadOnly?exists> readonly = "readonly"</#if>
 									               <#if subTableField.field_valid_type?if_exists?html != ''>
-									               datatype="${subTableField.field_valid_type?if_exists?html}"
+									               	<#if subTableField.field_valid_type=='only'>
+						       		   					validType="${sub},${subTableField.field_name},${sub}[0].id"
+						       		   					datatype="*"
+						       						<#else>
+					                   					 datatype="${subTableField.field_valid_type?if_exists?html}"
+					               					</#if>
 									               <#else>
 									               <#if subTableField.type == 'int'>
 									               datatype="n" 
@@ -394,7 +406,9 @@
 													<#-- update--end--author:zhangjiaqiang Date:20170417 for:增加校验必填项 -->
 									               <#if subTableField.operationCodesReadOnly?if_exists> readonly = "readonly"
 									               <#else>
-											       onClick="inputClick(this,'${subTableField.dict_text?if_exists?html}','${subTableField.dict_table?if_exists?html}');" 
+									               <#-- update--begin--author:baiyu Date:20171031 for:popupClick支持返回多个字段 -->
+											       onClick="popupClick(this,'${subTableField.dict_text?if_exists?html}','${subTableField.dict_field?if_exists?html}','${subTableField.dict_table?if_exists?html}');" 
+									               <#-- update--end--author:baiyu Date:20171031	 for:popupClick支持返回多个字段-->
 									               </#if>
 									               <#if subTableField.field_valid_type?if_exists?html != ''>
 									               datatype="${subTableField.field_valid_type?if_exists?html}"
@@ -415,10 +429,9 @@
 									               <#else>
 						               				<#if subTableField.is_null != 'Y'>datatype="*"</#if>
 									               </#if>>
-									                <a  target="_blank" id="${sub}[0].${subTableField.field_name}_href" <#if subTableData['${subTableField.field_name}']?if_exists?html != ''>href="${subTableData['${subTableField.field_name}']?if_exists?html}">下载<#else>>未上传</#if></a>
-											  	<br>
-											   <input class="form-control" type="button" value="上传附件"
+											   <input class="ui-button" type="button" value="上传附件"
 															onclick="commonUpload(commonUploadDefaultCallBack,'${sub}[0].${subTableField.field_name}')"/>
+									                <a  target="_blank" id="${sub}[0].${subTableField.field_name}_href" <#if subTableData['${subTableField.field_name}']?if_exists?html != ''>href="${subTableData['${subTableField.field_name}']?if_exists?html}">下载<#else>></#if></a>
 									             <#-- update--end--author:zhangjiaqiang date:20170607 for:增加对于文件和图片的支持 -->  
 										<#else>
 											<input id="${sub}[0].${subTableField.field_name}" ${subTableField.extend_json?if_exists} name="${sub}[0].${subTableField.field_name}" type="text"

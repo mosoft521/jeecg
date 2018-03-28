@@ -43,6 +43,8 @@ import org.jeecgframework.tag.core.easyui.TagUtil;
 import org.jeecgframework.tag.vo.datatable.DataTableReturn;
 import org.jeecgframework.tag.vo.datatable.DataTables;
 import org.jeecgframework.web.system.manager.ClientManager;
+import org.jeecgframework.web.system.pojo.base.InterroleEntity;
+import org.jeecgframework.web.system.pojo.base.InterroleUserEntity;
 import org.jeecgframework.web.system.pojo.base.TSDepart;
 import org.jeecgframework.web.system.pojo.base.TSFunction;
 import org.jeecgframework.web.system.pojo.base.TSRole;
@@ -185,6 +187,7 @@ public class UserController extends BaseController {
 		request.setAttribute("user", user);
 		return "system/user/changepassword";
 	}
+	//update-begin--Author:dangzhenghui  Date:20170429 for：添加头像功能--------------------
 	@RequestMapping(params = "changeportrait")
 	public String changeportrait(HttpServletRequest request) {
 		TSUser user = ResourceUtil.getSessionUser();
@@ -211,6 +214,7 @@ public class UserController extends BaseController {
 		}
 		return j;
 	}
+	//update-end--Author:dangzhenghui  Date:20170429 for：添加头像功能--------------------
 
 
 	/**
@@ -360,10 +364,10 @@ public class UserController extends BaseController {
 		}
 		List<TSRole> roleList = systemService.getList(TSRole.class);
 		comboBoxs = TagUtil.getComboBox(roleList, roles, comboBox);
-
+		//update-begin--Author:scott  Date:20160530 for：清空降低缓存占用
 		roleList.clear();
 		roles.clear();
-
+		//update-end--Author:scott  Date:20160530 for：清空降低缓存占用
 		return comboBoxs;
 	}
 
@@ -410,7 +414,11 @@ public class UserController extends BaseController {
         Short[] userstate = new Short[]{Globals.User_Normal, Globals.User_ADMIN, Globals.User_Forbidden};
         cq.in("status", userstate);
         cq.eq("deleteFlag", Globals.Delete_Normal);
-
+        //update--begin--author:zhangjiaqiang date:20180223 for:TASK #2531 【改造】用户列表不显示接口类型的用户
+        cq.eq("userType", Globals.USER_TYPE_SYSTEM);
+		//update--end--author:zhangjiaqiang date:20180223 for:TASK #2531 【改造】用户列表不显示接口类型的用户
+        
+        //update-start--Author:zhangguoming  Date:20140827 for：添加 组织机构 查询条件
         String orgIds = request.getParameter("orgIds");
         List<String> orgIdList = extractIdListByComma(orgIds);
         // 获取 当前组织机构的用户信息
@@ -422,11 +430,11 @@ public class UserController extends BaseController {
 
             cq.add(Property.forName("id").in(subCq.getDetachedCriteria()));
         }
-
+        //update-end--Author:zhangguoming  Date:20140827 for：添加 组织机构 查询条件
 
         cq.add();
         this.systemService.getDataGridReturn(cq, true);
-
+        // update-start--Author:gaofeng Date:20140822 for：添加用户的角色展示
         List<TSUser> cfeList = new ArrayList<TSUser>();
         for (Object o : dataGrid.getResults()) {
             if (o instanceof TSUser) {
@@ -445,10 +453,11 @@ public class UserController extends BaseController {
                 cfeList.add(cfe);
             }
         }
-
+//		update-end--Author:gaofeng Date:20140822 for：添加用户的角色展示
         TagUtil.datagrid(response, dataGrid);
     }
-
+	
+//update-start--Author: jg_huangxg  Date:20160730 for：#1206 【功能】用户列表，增加一个真实删除功能(修改删除体验)
 	/**
 	 * 用户删除选择对话框
 	 * 
@@ -475,7 +484,7 @@ public class UserController extends BaseController {
 			return j;
 		}
 	}
-
+//	update-end--Author: jg_huangxg  Date:20160730 for：#1206 【功能】用户列表，增加一个真实删除功能(修改删除体验)
 	
 	/**
 	 * 用户信息录入和更新
@@ -497,20 +506,20 @@ public class UserController extends BaseController {
 		user = systemService.getEntity(TSUser.class, user.getId());
 //		List<TSRoleUser> roleUser = systemService.findByProperty(TSRoleUser.class, "TSUser.id", user.getId());
 		if (!user.getStatus().equals(Globals.User_ADMIN)) {
-
+//			update-start--Author: jg_huangxg  Date:20160528 for: 【删除用户】删除用户，改成逻辑删除
 			user.setDeleteFlag(Globals.Delete_Forbidden);
 			userService.updateEntitie(user);
 			message = "用户：" + user.getUserName() + "删除成功";
 			logger.info("["+IpUtil.getIpAddr(req)+"][逻辑删除用户]"+message);
-
+//			update-end--Author: jg_huangxg  Date:20160528 for: 【删除用户】删除用户，改成逻辑删除
 			
 /**
 			if (roleUser.size()>0) {
 				// 删除用户时先删除用户和角色关系表
 				delRoleUser(user);
-
+//                update-start--Author:zhangguoming  Date:20140825 for：添加业务逻辑
                 systemService.executeSql("delete from t_s_user_org where user_id=?", user.getId()); // 删除 用户-机构 数据
-
+//                update-end--Author:zhangguoming  Date:20140825 for：添加业务逻辑
                 userService.delete(user);
 				message = "用户：" + user.getUserName() + "删除成功";
 				systemService.addLog(message, Globals.Log_Type_DEL, Globals.Log_Leavel_INFO);
@@ -544,7 +553,7 @@ public class UserController extends BaseController {
 			return j;
 		}
 		user = systemService.getEntity(TSUser.class, user.getId());
-
+//		update-start--Author: zhoujf  Date:20170220 for: TASK #1683 【bug】jeecg事务编码不严谨，存在不回滚问题
 		/*List<TSRoleUser> roleUser = systemService.findByProperty(TSRoleUser.class, "TSUser.id", user.getId());
 		if (!user.getStatus().equals(Globals.User_ADMIN)) {
 			if (roleUser.size()>0) {
@@ -569,7 +578,7 @@ public class UserController extends BaseController {
 			e.printStackTrace();
 			message ="删除失败";
 		}
-
+//		update-end--Author: zhoujf  Date:20170220 for: TASK #1683 【bug】jeecg事务编码不严谨，存在不回滚问题
 
 		j.setMsg(message);
 		return j;
@@ -604,7 +613,28 @@ public class UserController extends BaseController {
 		}
 		return v;
 	}
-
+	//update--begin--author:zhangjiaqiang date:20171019 for:支持使用邮箱作为登录账号
+	/**
+	 * 检查用户邮箱
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(params="checkUserEmail")
+	@ResponseBody
+	public ValidForm checkUserEmail(HttpServletRequest request){
+		ValidForm validForm = new ValidForm();
+		String email=oConvertUtils.getString(request.getParameter("param"));
+		String code=oConvertUtils.getString(request.getParameter("code"));
+		List<TSUser> userList=systemService.findByProperty(TSUser.class,"email",email);
+		if(userList.size()>0&&!code.equals(email))
+		{
+			validForm.setInfo("邮箱已绑定相关用户信息");
+			validForm.setStatus("n");
+		}
+		return validForm;
+	}
+	////update--begin--author:zhangjiaqiang date:20171019 for:支持使用邮箱作为登录账号
+	
 	/**
 	 * 用户录入
 	 * 
@@ -612,64 +642,50 @@ public class UserController extends BaseController {
 	 * @param req
 	 * @return
 	 */
-
 	@RequestMapping(params = "saveUser")
 	@ResponseBody
 	public AjaxJson saveUser(HttpServletRequest req, TSUser user) {
 		String message = null;
 		AjaxJson j = new AjaxJson();
+		//update--begin-- author:Yandong -- date:20180115-- for:TASK #2494 【改造】Jeecg 代码事务不严谨，control的逻辑改到service里面---
+		Short logType=Globals.Log_Type_UPDATE;
 		// 得到用户的角色
 		String roleid = oConvertUtils.getString(req.getParameter("roleid"));
-		String password = oConvertUtils.getString(req.getParameter("password"));
+		String orgid=oConvertUtils.getString(req.getParameter("orgIds"));
 		if (StringUtil.isNotEmpty(user.getId())) {
 			TSUser users = systemService.getEntity(TSUser.class, user.getId());
 			users.setEmail(user.getEmail());
 			users.setOfficePhone(user.getOfficePhone());
 			users.setMobilePhone(user.getMobilePhone());
 			users.setDevFlag(user.getDevFlag());
-
-            systemService.executeSql("delete from t_s_user_org where user_id=?", user.getId());
-            saveUserOrgList(req, user);
-//            users.setTSDepart(user.getTSDepart());
-
 			users.setRealName(user.getRealName());
 			users.setStatus(Globals.User_Normal);
 			users.setActivitiSync(user.getActivitiSync());
-			systemService.updateEntitie(users);
-			List<TSRoleUser> ru = systemService.findByProperty(TSRoleUser.class, "TSUser.id", user.getId());
-			systemService.deleteAllEntitie(ru);
+			this.userService.saveOrUpdate(users, orgid.split(","), roleid.split(","));
 			message = "用户: " + users.getUserName() + "更新成功";
-			if (StringUtil.isNotEmpty(roleid)) {
-				saveRoleUser(users, roleid);
-			}
-			systemService.addLog(message, Globals.Log_Type_UPDATE, Globals.Log_Leavel_INFO);
 		} else {
 			TSUser users = systemService.findUniqueByProperty(TSUser.class, "userName",user.getUserName());
 			if (users != null) {
 				message = "用户: " + users.getUserName() + "已经存在";
 			} else {
-				user.setPassword(PasswordUtil.encrypt(user.getUserName(), password, PasswordUtil.getStaticSalt()));
-//				if (user.getTSDepart().equals("")) {
-//					user.setTSDepart(null);
-//				}
+				user.setPassword(PasswordUtil.encrypt(user.getUserName(), oConvertUtils.getString(req.getParameter("password")), PasswordUtil.getStaticSalt()));
 				user.setStatus(Globals.User_Normal);
 				user.setDeleteFlag(Globals.Delete_Normal);
-				systemService.save(user);
-                // todo zhanggm 保存多个组织机构
-                saveUserOrgList(req, user);
+				//默认添加为系统用户
+				user.setUserType(Globals.USER_TYPE_SYSTEM);
+				this.userService.saveOrUpdate(user, orgid.split(","), roleid.split(","));				
 				message = "用户: " + user.getUserName() + "添加成功";
-				if (StringUtil.isNotEmpty(roleid)) {
-					saveRoleUser(user, roleid);
-				}
-				systemService.addLog(message, Globals.Log_Type_INSERT, Globals.Log_Leavel_INFO);
+				logType=Globals.Log_Type_INSERT;
 			}
-
 		}
+		systemService.addLog(message, logType, Globals.Log_Leavel_INFO);
 		j.setMsg(message);
 		logger.info("["+IpUtil.getIpAddr(req)+"][添加编辑用户]"+message);
 		return j;
+		//update--end-- author:Yandong -- date:20180115-- for:TASK #2494 【改造】Jeecg 代码事务不严谨，control的逻辑改到service里面---
 	}
 
+//    update-start--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑方法
     /**
      * 保存 用户-组织机构 关系信息
      * @param request request
@@ -694,7 +710,7 @@ public class UserController extends BaseController {
             systemService.batchSave(userOrgList);
         }
     }
-
+//    update-end--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑方法
 
     protected void saveRoleUser(TSUser user, String roleidstr) {
 		String[] roleids = roleidstr.split(",");
@@ -720,6 +736,7 @@ public class UserController extends BaseController {
 		String ids = oConvertUtils.getString(request.getParameter("ids"));
 		mv.addObject("ids", ids);
 		return mv;
+		//--author：zhoujf-----end------date:20150531--------for: 编辑用户，选择角色,弹出的角色列表页面，默认没选中
 	}
 
 	/**
@@ -748,7 +765,7 @@ public class UserController extends BaseController {
 	 */
 	@RequestMapping(params = "addorupdate")
 	public ModelAndView addorupdate(TSUser user, HttpServletRequest req) {
-
+		//update--start--by:jg_renjie--at:20160318 for:#942 【组件封装】组织机构弹出模式，目前是列表，得改造成树方式
 		/*		List<TSDepart> departList = new ArrayList<TSDepart>();
 		String departid = oConvertUtils.getString(req.getParameter("departid"));
 		if(!StringUtil.isEmpty(departid)){
@@ -757,7 +774,7 @@ public class UserController extends BaseController {
 			departList.addAll((List)systemService.getList(TSDepart.class));
 		}
 		req.setAttribute("departList", departList);*/
-
+//		        update-start--Author:zhangguoming  Date:20140825 for：往request作用域中添加数据：组装页面中组织机构combobox多选框的数据
         List<String> orgIdList = new ArrayList<String>();
         TSDepart tsDepart = new TSDepart();
 		if (StringUtil.isNotEmpty(user.getId())) {
@@ -769,11 +786,141 @@ public class UserController extends BaseController {
 		}
 		req.setAttribute("tsDepart", tsDepart);
         //req.setAttribute("orgIdList", JSON.toJSON(orgIdList));
-
+//		        update-start--Author:zhangguoming  Date:20140825 for：往request作用域中添加数据：组装页面中组织机构combobox多选框的数据
+		//update--end--by:jg_renjie--at:20160318 for:#942 【组件封装】组织机构弹出模式，目前是列表，得改造成树方式
 
         return new ModelAndView("system/user/user");
 	}
+	//-- author:Yandong -- date:20171229 for:集成接口权限管理 ----
+	/**
+	 * 添加、编辑接口用户
+	 * 
+	 * @param request
+	 * @param response
+	 * @param dataGrid
+	 * @param user
+	 */
+	@RequestMapping(params = "addorupdateInterfaceUser")
+	public ModelAndView addorupdateInterfaceUser(TSUser user, HttpServletRequest req) {
+        TSDepart tsDepart = new TSDepart();
+		if (StringUtil.isNotEmpty(user.getId())) {
+			user = systemService.getEntity(TSUser.class, user.getId());
+			req.setAttribute("user", user);
+			interfaceroleidandname(req, user);
+		}else{
+			String roleId = req.getParameter("roleId");
+	        InterroleEntity role = systemService.getEntity(InterroleEntity.class, roleId);
+	        req.setAttribute("roleId", roleId);
+			req.setAttribute("roleName", role.getRoleName());
+		}
+		req.setAttribute("tsDepart", tsDepart);
+        return new ModelAndView("system/user/interfaceUser");
+	}
+	
+	public void interfaceroleidandname(HttpServletRequest req, TSUser user) {
+		List<InterroleUserEntity> roleUsers = systemService.findByProperty(InterroleUserEntity.class, "TSUser.id", user.getId());
+		String roleId = "";
+		String roleName = "";
+		if (roleUsers.size() > 0) {
+			for (InterroleUserEntity interroleUserEntity : roleUsers) {
+				roleId += interroleUserEntity.getInterroleEntity().getId() + ",";
+				roleName += interroleUserEntity.getInterroleEntity().getRoleName() + ",";
+			}
+		}
+		req.setAttribute("roleId", roleId);
+		req.setAttribute("roleName", roleName);
 
+	}
+	
+	/**
+	 * 接口用户录入
+	 * 
+	 * @param user
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(params = "saveInterfaceUser")
+	@ResponseBody
+	public AjaxJson saveInterfaceUser(HttpServletRequest req, TSUser user) {
+		String message = null;
+		AjaxJson j = new AjaxJson();
+		// 得到用户的角色
+		String roleid = oConvertUtils.getString(req.getParameter("roleid"));
+		String password = oConvertUtils.getString(req.getParameter("password"));
+		if (StringUtil.isNotEmpty(user.getId())) {
+			TSUser users = systemService.getEntity(TSUser.class, user.getId());
+			users.setEmail(user.getEmail());
+			users.setOfficePhone(user.getOfficePhone());
+			users.setMobilePhone(user.getMobilePhone());
+			users.setDevFlag(user.getDevFlag());
+//            update-start--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑
+//            systemService.executeSql("delete from t_s_user_org where user_id=?", user.getId());
+//            saveUserOrgList(req, user);
+//            users.setTSDepart(user.getTSDepart());
+//            update-end--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑
+			users.setRealName(user.getRealName());
+			users.setStatus(Globals.User_Normal);
+			users.setActivitiSync(user.getActivitiSync());
+			
+			users.setUserNameEn(user.getUserNameEn());
+			users.setUserType(user.getUserType());
+//			users.setPersonType(user.getPersonType());
+			users.setSex(user.getSex());
+			users.setEmpNo(user.getEmpNo());
+			users.setCitizenNo(user.getCitizenNo());
+			users.setFax(user.getFax());
+			users.setAddress(user.getAddress());
+			users.setPost(user.getPost());
+			users.setMemo(user.getMemo());
+			
+			systemService.updateEntitie(users);
+			List<TSRoleUser> ru = systemService.findByProperty(TSRoleUser.class, "TSUser.id", user.getId());
+			systemService.deleteAllEntitie(ru);//TODO ?
+			message = "用户: " + users.getUserName() + "更新成功";
+//			if (StringUtil.isNotEmpty(roleid)) {
+//				saveInterfaceRoleUser(users, roleid);
+//			}
+			systemService.addLog(message, Globals.Log_Type_UPDATE, Globals.Log_Leavel_INFO);
+		} else {
+			TSUser users = systemService.findUniqueByProperty(TSUser.class, "userName",user.getUserName());
+			if (users != null) {
+				message = "用户: " + users.getUserName() + "已经存在";
+			} else {
+				user.setPassword(PasswordUtil.encrypt(user.getUserName(), password, PasswordUtil.getStaticSalt()));
+//				if (user.getTSDepart().equals("")) {
+//					user.setTSDepart(null);
+//				}
+				user.setStatus(Globals.User_Normal);
+				user.setDeleteFlag(Globals.Delete_Normal);
+				systemService.save(user);
+                // todo zhanggm 保存多个组织机构
+//                saveUserOrgList(req, user);
+				message = "用户: " + user.getUserName() + "添加成功";
+				if (StringUtil.isNotEmpty(roleid)) {
+					saveInterfaceRoleUser(user, roleid);
+				}
+				systemService.addLog(message, Globals.Log_Type_INSERT, Globals.Log_Leavel_INFO);
+			}
+
+		}
+		j.setMsg(message);
+		logger.info("["+IpUtil.getIpAddr(req)+"][添加编辑用户]"+message);
+		return j;
+	}
+	
+	protected void saveInterfaceRoleUser(TSUser user, String roleidstr) {
+		String[] roleids = roleidstr.split(",");
+		for (int i = 0; i < roleids.length; i++) {
+			InterroleUserEntity rUser = new InterroleUserEntity();
+			InterroleEntity role = systemService.getEntity(InterroleEntity.class, roleids[i]);
+			rUser.setInterroleEntity(role);
+			rUser.setTSUser(user);
+			systemService.save(rUser);
+		}
+	}
+	//-- author:Yandong -- date:20171229 for:集成接口权限管理 ----
+
+//    update-start--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑方法
     /**
      * 用户的登录后的组织机构选择页面
      * @param request request
@@ -795,7 +942,7 @@ public class UserController extends BaseController {
 
 		return new ModelAndView("system/user/userOrgSelect");
     }
-
+//    update-end--Author:zhangguoming  Date:20140825 for：添加新的业务逻辑方法
 
 	public void idandname(HttpServletRequest req, TSUser user) {
 		List<TSRoleUser> roleUsers = systemService.findByProperty(TSRoleUser.class, "TSUser.id", user.getId());
@@ -1079,7 +1226,7 @@ public class UserController extends BaseController {
 		if(user!=null){
 			String indexStyle = request.getParameter("indexStyle");
 //			String cssTheme = request.getParameter("cssTheme");
-
+//			update-start--Author:longjb  Date:20150408 for：ACE风格未指定情况下默认主题为metro
 //			if(StringUtils.isNotEmpty(cssTheme)){
 //				Cookie cookie4css = new Cookie("JEECGCSSTHEME", cssTheme);
 //				cookie4css.setMaxAge(3600*24*30);
@@ -1090,14 +1237,15 @@ public class UserController extends BaseController {
 //				cookie4css.setMaxAge(3600*24*30);
 //				response.addCookie(cookie4css);
 //				logger.info("cssTheme:metro");
-
+////				update-start--Author:longjb  Date:20150317 for：切换回其他主题风格时变成default
 //			}else {
 //				Cookie cookie4css = new Cookie("JEECGCSSTHEME", "");
 //				cookie4css.setMaxAge(3600*24*30);
 //				response.addCookie(cookie4css);
 //				logger.info("cssTheme:default");
 //			}
-
+//			update-end--Author:longjb  Date:20150317 for：切换回回其他主题风格时变成default 
+//			update-start--Author:longjb  Date:20150408 for：ACE风格未指定情况下主题为metro
 			
 			if(StringUtils.isNotEmpty(indexStyle)){
 				Cookie cookie = new Cookie("JEECGINDEXSTYLE", indexStyle);
@@ -1108,12 +1256,12 @@ public class UserController extends BaseController {
 				j.setSuccess(Boolean.TRUE);
 				j.setMsg("样式修改成功，请刷新页面");
 			}
-
+            //update-start--Author:JueYue  Date:2014-5-28 for:风格切换,菜单懒加载失效的问题
 			try {
 				 ClientManager.getInstance().getClient().getFunctions().clear();
 			} catch (Exception e) {
 			}
-
+            //update-end--Author:JueYue  Date:2014-5-28 for:风格切换,菜单懒加载失效的问题
 		}else{
 			j.setMsg("请登录后再操作");
 		}
@@ -1149,20 +1297,24 @@ public class UserController extends BaseController {
 			//托管
 			systemService.getSession().evict(user);
 			String id = user.getId();
-			List<TSRole> roles = systemService.getSession().createSQLQuery("select * from t_s_role where id in (select roleid from t_s_role_user where userid=:userid)")
-					.addEntity(TSRole.class).setString("userid",id).list();
+			//update--begin--author:zhangjiaqiang date:20171019 for:支持使用邮箱作为登录账号
+			//update-begin--Author:xuelin  Date:20171018 for：TASK #2384 【bug】用户管理导出功能报错--------------------
+			String queryRole = "select * from t_s_role where id in (select roleid from t_s_role_user where userid=:userid)";
+			List<TSRole> roles = systemService.getSession().createSQLQuery(queryRole).addEntity(TSRole.class).setString("userid",id).list();
 			String roleCodes = "";
 			for(TSRole role:roles){
-				roleCodes += role.getRoleCode()+",";
+				roleCodes += ","+role.getRoleCode();
 			}
-			user.setUserKey(roleCodes.substring(0,roleCodes.length()-1));
-			List<TSDepart> departs = systemService.getSession().createSQLQuery("select * from t_s_depart where id in (select org_id from t_s_user_org where user_id=:userid)")
-					.addEntity(TSDepart.class).setString("userid",id).list();
+			user.setUserKey(roleCodes.replaceFirst(",", ""));
+			String queryDept = "select * from t_s_depart where id in (select org_id from t_s_user_org where user_id=:userid)";
+			List<TSDepart> departs = systemService.getSession().createSQLQuery(queryDept).addEntity(TSDepart.class).setString("userid",id).list();
 			String departCodes = "";
 			for(TSDepart depart:departs){
-				departCodes += depart.getOrgCode()+",";
+				departCodes += ","+depart.getOrgCode();
 			}
-			user.setDepartid(departCodes.substring(0,departCodes.length()-1));
+			user.setDepartid(departCodes.replaceFirst(",", ""));
+			//update-end--Author:xuelin  Date:20171018 for：TASK #2384 【bug】用户管理导出功能报错--------------------
+			//update--end--author:zhangjiaqiang date:20171019 for:支持使用邮箱作为登录账号
 		}
 		modelMap.put(NormalExcelConstants.FILE_NAME,"用户表");
 		modelMap.put(NormalExcelConstants.CLASS,TSUser.class);
@@ -1206,14 +1358,24 @@ public class UserController extends BaseController {
 			try {
 				List<TSUser> tsUsers = ExcelImportUtil.importExcel(file.getInputStream(),TSUser.class,params);
 				for (TSUser tsUser : tsUsers) {
-					tsUser.setStatus(new Short("1"));
+					//update-begin--Author:xuelin  Date:20171017 for：TASK #2373 【bug】表改造问题，导致 3.7.1批量导入用户bug-导入不成功--------------------
 					String username = tsUser.getUserName();
-					String roleCodes = tsUser.getUserKey();
-					String deptCodes = tsUser.getDepartid();
-
 					if(username==null||username.equals("")){
 						j.setMsg("用户名为必填字段，导入失败");
-					}else if((roleCodes==null||roleCodes.equals(""))||(deptCodes==null||deptCodes.equals(""))){
+						return j;
+					}
+
+					tsUser.setStatus(new Short("1"));
+					tsUser.setDevFlag("0");
+					tsUser.setDeleteFlag(new Short("0"));
+					String roleCodes = tsUser.getUserKey();
+					String deptCodes = tsUser.getDepartid();
+					//update-begin--Author:Yandong  Date:20180228 for：TASK #2539 【新功能】用户导入没有密码字段(不需要修改);导入用户默认类型为系统用户----------
+					tsUser.setPassword(PasswordUtil.encrypt(username, "123456", PasswordUtil.getStaticSalt()));
+					tsUser.setUserType(Globals.USER_TYPE_SYSTEM);//导入用户 在用户管理列表不显示
+					//update-begin--Author:Yandong  Date:20180228 for：TASK #2539 【新功能】用户导入没有密码字段(不需要修改);导入用户默认类型为系统用户----------
+					//update-end--Author:xuelin  Date:20171017 for：TASK #2373 【bug】表改造问题，导致 3.7.1批量导入用户bug-导入不成功--------------------
+					if((roleCodes==null||roleCodes.equals(""))||(deptCodes==null||deptCodes.equals(""))){
 						List<TSUser> users = systemService.findByProperty(TSUser.class,"userName",username);
 						if(users.size()!=0){
 							//用户存在更新
@@ -1326,5 +1488,33 @@ public class UserController extends BaseController {
 	@RequestMapping(params = "userSelect")
 	public String userSelect() {
 		return "system/user/userSelect";
+	}
+	
+	/**
+	 * 添加、编辑我的机构用户
+	 * 
+	 * @param request
+	 * @param response
+	 * @param dataGrid
+	 * @param user
+	 */
+	@RequestMapping(params = "addorupdateMyOrgUser")
+	public ModelAndView addorupdateMyOrgUser(TSUser user, HttpServletRequest req) {
+        List<String> orgIdList = new ArrayList<String>();
+        TSDepart tsDepart = new TSDepart();
+		if (StringUtil.isNotEmpty(user.getId())) {
+			user = systemService.getEntity(TSUser.class, user.getId());
+			
+			req.setAttribute("user", user);
+			idandname(req, user);
+			getOrgInfos(req, user);
+		}else{
+			String departid = oConvertUtils.getString(req.getParameter("departid"));
+			TSDepart org = systemService.getEntity(TSDepart.class,departid);
+			req.setAttribute("orgIds", departid);
+			req.setAttribute("departname", org.getDepartname());
+		}
+		req.setAttribute("tsDepart", tsDepart);
+        return new ModelAndView("system/user/myOrgUser");
 	}
 }

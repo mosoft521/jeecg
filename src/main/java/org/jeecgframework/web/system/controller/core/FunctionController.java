@@ -171,7 +171,7 @@ public class FunctionController extends BaseController {
 			}
 
 			e.printStackTrace();
-			message=MutiLangUtil.getMutiLangInstance().getLang("common.menu.del.fail");
+			message=MutiLangUtil.getLang("common.menu.del.fail");
 		}
 
 		systemService.addLog(message, Globals.Log_Type_DEL,
@@ -451,7 +451,11 @@ public class FunctionController extends BaseController {
 		treeGridModel.setFunctionType("functionType");
 
 		treeGrids = systemService.treegrid(functionList, treeGridModel);
-
+		for (TreeGrid tg : treeGrids) {
+			if("closed".equals(tg.getState()))tg.setSrc("");
+		}
+		
+		
 		MutiLangUtil.setMutiTree(treeGrids);
 		return treeGrids;
 	}

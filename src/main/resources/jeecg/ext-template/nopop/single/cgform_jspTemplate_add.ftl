@@ -80,7 +80,7 @@
 					<td class="value">
 						 <#if po.showType=='text'>
 						  <#-- update--begin--author:zhangjiaqiangDate:20170509 for:修订生成代码不美观 -->
-					     	 <input id="${po.fieldName}" name="${po.fieldName}" type="text" style="width: 150px" class="inputxt" <@datatype validType="${po.fieldValidType!''}" isNull="${po.isNull}" type="${po.type}" mustInput="${po.fieldMustInput!''}"/>/>
+					     	 <input id="${po.fieldName}" name="${po.fieldName}" type="text" style="width: 150px" class="inputxt" <@datatype validType="${po.fieldValidType!''}" isNull="${po.isNull}" type="${po.type}" mustInput="${po.fieldMustInput!''}" tableName="${po.table.tableName}" fieldName="${po.oldFieldName}"/>/>
 							 <#-- update--begin--author:zhangjiaqiangDate:20170509 for:修订生成代码不美观 -->
 						<#elseif po.showType=='popup'>
 								 <#-- update--begin--author:zhangjiaqiangDate:20170509 for:修订生成代码不美观 -->
@@ -281,6 +281,9 @@
 									        type:'POST',  
 									        dataType:'JSON',
 									        async:false,  
+									         data:{
+									        	selfCode:'${po.dictField}'
+									        },
 									        success:function(res){
 									            var obj = res; 
 									            $.fn.zTree.init($("#show${po.fieldName?cap_first }Tree"), ${po.fieldName}Setting, obj);  
