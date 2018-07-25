@@ -22,10 +22,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
  */
 public class DynamicDBUtil {
 	private static final Logger logger = Logger.getLogger(DynamicDBUtil.class);
-	/**
-	 * 多数据连接池
-	 */
-	private static Map<String,BasicDataSource> dbSources = new HashMap<String,BasicDataSource>();
 	
 	/**
 	 * 获取数据源【最底层方法，不要随便调用】
@@ -59,14 +55,16 @@ public class DynamicDBUtil {
 	 */
 	public static BasicDataSource getDbSourceBydbKey(final String dbKey) {
 		//获取多数据源配置
-		DynamicDataSourceEntity dynamicSourceEntity = ResourceUtil.dynamicDataSourceMap.get(dbKey);
+		DynamicDataSourceEntity dynamicSourceEntity = ResourceUtil.getCacheDynamicDataSourceEntity(dbKey);
 		//先判断缓存中是否存在数据库链接
-		BasicDataSource cacheDbSource = dbSources.get(dbKey);
+		BasicDataSource cacheDbSource = ResourceUtil.getCacheBasicDataSource(dbKey);
 		if(cacheDbSource!=null && !cacheDbSource.isClosed()){
+			logger.debug("--------getDbSourceBydbKey------------------从缓存中获取DB连接-------------------");
 			return cacheDbSource;
 		}else{
 			BasicDataSource dataSource = getJdbcDataSource(dynamicSourceEntity);
-			dbSources.put(dbKey, dataSource);
+			ResourceUtil.putCacheBasicDataSource(dbKey, dataSource);
+			logger.info("--------getDbSourceBydbKey------------------创建DB数据库连接-------------------");
 			return dataSource;
 		}
 	}
@@ -283,69 +281,4 @@ public class DynamicDBUtil {
 		return ReflectHelper.transList2Entrys(queryList, clazz);
 	}
 
-	
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) {
-		DynamicDataSourceEntity dynamicSourceEntity = new DynamicDataSourceEntity();
-		
-		String dbKey = "SAP_DB";
-		String driverClassName = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://localhost:3306/jeecg";
-		String dbUser = "root";
-		String dbPassword = "root";
-		
-		dynamicSourceEntity.setDbKey(dbKey);
-		dynamicSourceEntity.setDriverClass(driverClassName);
-		dynamicSourceEntity.setUrl(url);
-		dynamicSourceEntity.setDbUser(dbUser);
-		dynamicSourceEntity.setDbPassword(dbPassword);
-		
-		ResourceUtil.dynamicDataSourceMap.put(dbKey, dynamicSourceEntity);
-		
-		String sql = "<#if nlevel gt 2> insert into GWYUTEST003(id, sname, nlevel) values ((select maxid from (select ifnull(max(id)+1,1) maxid from GWYUTEST003) a),"
-				+ " :sname, :nlevel)</#if>";
-		HashMap<String, Object> data = new HashMap<String, Object>();
-		data.put("sname", "aaa");
-		data.put("nlevel", 3);
-		DynamicDBUtil.updateByHash(dbKey, sql, data);
-		
-		sql = "SELECT * FROM GWYUTEST003 WHERE id = :id";data = new HashMap<String, Object>();
-		data.put("id", 1);
-		Map<String, Object> aaa = (Map<String, Object>) DynamicDBUtil.findOneByHash(dbKey, sql, data);
-		System.out.println(aaa.get("sname"));
-		
-		sql = "SELECT * FROM GWYUTEST003 WHERE id >= '${id}'";data = new HashMap<String, Object>();
-		data.put("id", 2);
-		List<GwyuTest> bbb = DynamicDBUtil.findListEntrysByHash(dbKey, sql, GwyuTest.class, data);
-		System.out.println(bbb);
-		
-		//List<Map<String, Object>> list = DynamicDBUtil.getList(jdbcTemplate, sql);
-		//System.out.println(list.size());
-	}
-	public static class GwyuTest{
-		public GwyuTest(){}
-		private long id;
-		private String sname;
-		private long nlevel;
-		public long getId() {
-			return id;
-		}
-		public void setId(long id) {
-			this.id = id;
-		}
-		public String getSname() {
-			return sname;
-		}
-		public void setSname(String sname) {
-			this.sname = sname;
-		}
-		public long getNlevel() {
-			return nlevel;
-		}
-		public void setNlevel(long nlevel) {
-			this.nlevel = nlevel;
-		}
-		
-	}
-	
 }

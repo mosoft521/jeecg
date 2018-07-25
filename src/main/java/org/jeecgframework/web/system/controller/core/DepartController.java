@@ -39,6 +39,7 @@ import org.jeecgframework.tag.core.easyui.TagUtil;
 import org.jeecgframework.tag.vo.datatable.SortDirection;
 import org.jeecgframework.tag.vo.easyui.ComboTreeModel;
 import org.jeecgframework.tag.vo.easyui.TreeGridModel;
+import org.jeecgframework.web.system.dao.DepartAuthGroupDao;
 import org.jeecgframework.web.system.pojo.base.TSDepart;
 import org.jeecgframework.web.system.pojo.base.TSDepartExcelView;
 import org.jeecgframework.web.system.pojo.base.TSUser;
@@ -76,6 +77,8 @@ public class DepartController extends BaseController {
 	private static final Logger logger = Logger.getLogger(DepartController.class);
 	private UserService userService;
 	private SystemService systemService;
+	@Autowired
+	private DepartAuthGroupDao departAuthGroupDao;
 
 	@Autowired
 	public void setSystemService(SystemService systemService) {
@@ -126,8 +129,10 @@ public class DepartController extends BaseController {
 					ajaxJson.setSuccess(false);
 					ajaxJson.setMsg("当前用户只包含有当前组织机构关系，不可删除，请切换用户的组织机构关系");
 				}else{
-					String sql = "delete from t_s_user_org where user_id = '"+userid+"' and org_id = '"+departid+"'";
-					this.systemService.executeSql(sql);
+
+					String sql = "delete from t_s_user_org where user_id = ? and org_id = ?";
+					this.systemService.executeSql(sql,userid,departid);
+
 					ajaxJson.setMsg("成功删除用户对应的组织机构关系");
 				}
 			} catch (Exception e) {
@@ -163,7 +168,9 @@ public class DepartController extends BaseController {
 		depart = systemService.getEntity(TSDepart.class, depart.getId());
         message = MutiLangUtil.paramDelSuccess("common.department");
         if (depart.getTSDeparts().size() == 0) {
-            Long userCount = systemService.getCountForJdbc("select count(1) from t_s_user_org where org_id='" + depart.getId() + "'");
+
+            Long userCount = systemService.getCountForJdbcParam("select count(1) from t_s_user_org where org_id= ?",depart.getId());
+
             if(userCount == 0) { // 组织机构下没有用户时，该组织机构才允许删除。
                 systemService.executeSql("delete from t_s_role_org where org_id=?", depart.getId());
                 systemService.delete(depart);
@@ -382,17 +389,14 @@ public class DepartController extends BaseController {
 	 */
 	@RequestMapping(params = "userDatagrid")
 	public void userDatagrid(TSUser user,HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
-
 		if(user!=null&&user.getDepartid()!=null){
 			user.setDepartid(null);//设置用户的所属部门的查询条件为空；
 		}
-
 		CriteriaQuery cq = new CriteriaQuery(TSUser.class, dataGrid);
 		//查询条件组装器
 		org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq, user);
 		String departid = oConvertUtils.getString(request.getParameter("departid"));
 		if (!StringUtil.isEmpty(departid)) {
-
 			DetachedCriteria dc = cq.getDetachedCriteria();
 			DetachedCriteria dcDepart = dc.createCriteria("userOrgList");
 			dcDepart.add(Restrictions.eq("tsDepart.id", departid));
@@ -407,8 +411,35 @@ public class DepartController extends BaseController {
 		this.systemService.getDataGridReturn(cq, true);
 		TagUtil.datagrid(response, dataGrid);
 	}
-	//----
-
+	
+//	/**
+//	 * 成员列表dataGrid - minidao方式（可以查看机构包括下级机构的用户），like 'A01%'
+//	 * @param user
+//	 * @param request
+//	 * @param response
+//	 * @param dataGrid
+//	 */
+//	public void userDatagrid(TSUser user,HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
+//		String departid = oConvertUtils.getString(request.getParameter("departid"));
+//		
+//		//手工转换minidao查询规则
+//		if(oConvertUtils.isNotEmpty(user.getUpdateName())){
+//			user.setUserName(user.getUserName().replace("*","%"));
+//		}
+//		if(oConvertUtils.isNotEmpty(user.getRealName())){
+//			user.setRealName(user.getRealName().replace("*","%"));
+//		}
+//		
+//		if(oConvertUtils.isNotEmpty(departid)){
+//			TSDepart tsdepart = this.systemService.get(TSDepart.class,departid);
+//			MiniDaoPage<TSUser> list = departAuthGroupDao.getUserByDepartCode(dataGrid.getPage(), dataGrid.getRows(),tsdepart.getOrgCode(),user);
+//			dataGrid.setTotal(list.getTotal());
+//			dataGrid.setResults(list.getResults());
+//		}
+//		
+//		TagUtil.datagrid(response, dataGrid);
+//	}
+	
     /**
      * 获取机构树-combotree
      * @param request
@@ -425,6 +456,7 @@ public class DepartController extends BaseController {
         comboTrees = systemService.ComboTree(departsList, comboTreeModel, null, true);
         return comboTrees;
     }
+
 
     /**
      * 添加 用户到组织机构 的页面  跳转

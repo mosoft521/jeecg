@@ -1,6 +1,7 @@
 package org.jeecgframework.web.cgform.common;
 
 import org.jeecgframework.core.util.StringUtil;
+import org.jeecgframework.core.util.oConvertUtils;
 
 import org.jeecgframework.web.cgform.entity.config.CgFormFieldEntity;
 /**   
@@ -14,10 +15,16 @@ public class FormHtmlUtil {
 	/**
      *根据CgFormFieldEntity表属性配置，返回表单HTML代码
      */
-    public static String getFormHTML(CgFormFieldEntity cgFormFieldEntity){
+    public static String getFormHTML(CgFormFieldEntity cgFormFieldEntity,String tableName){
     	String html="";
         if(cgFormFieldEntity.getShowType().equals("text")){
-        	html=getTextFormHtml(cgFormFieldEntity);
+
+        	 if("only".equalsIgnoreCase(cgFormFieldEntity.getFieldValidType())){
+        		 html=getTextOnlyFormHtml(cgFormFieldEntity,tableName);
+        	 }else{
+        		 html=getTextFormHtml(cgFormFieldEntity);
+        	 }
+
         }else if(cgFormFieldEntity.getShowType().equals("password")){
         	html=getPwdFormHtml(cgFormFieldEntity);
         }else if(cgFormFieldEntity.getShowType().equals("radio")){
@@ -99,7 +106,31 @@ public class FormHtmlUtil {
       html.append("\\/>");
       return html.toString();
     }
-    
+
+    /**
+     *返回text类型的表单html(唯一值校验)
+     */
+    private static String getTextOnlyFormHtml(CgFormFieldEntity cgFormFieldEntity,String tableName)
+    {
+    	StringBuilder html = new StringBuilder("");
+        html.append("<input type=\"text\" ");
+        html.append("id=\"").append(cgFormFieldEntity.getFieldName()).append("\" ");
+        html.append("name=\"").append(cgFormFieldEntity.getFieldName()).append("\" ");
+        if(cgFormFieldEntity.getFieldLength()!=null&&cgFormFieldEntity.getFieldLength()>0){
+      	  html.append("style=\"width:").append(cgFormFieldEntity.getFieldLength()).append("px\" ");
+        }
+        html.append("value=\"\\${").append(cgFormFieldEntity.getFieldName()).append("?if_exists?html}\" ");
+        if("Y".equals(cgFormFieldEntity.getIsNull())){
+      	  html.append("ignore=\"ignore\" ");
+        }else{
+      	  html.append("ignore=\"checked\" ");
+        }
+        html.append("validtype=\"").append(tableName).append(",").append(cgFormFieldEntity.getFieldName()).append(",id\" ");
+  	  	html.append("datatype=\"*\" ");
+        html.append("\\/>");
+        return html.toString();
+    }
+
     /**
      *返回password类型的表单html
      */
@@ -343,7 +374,9 @@ public class FormHtmlUtil {
     	  html.append("style=\"width:").append(cgFormFieldEntity.getFieldLength()).append("px\" ");
       }
       html.append("value=\"\\${").append(cgFormFieldEntity.getFieldName()).append("?if_exists?html}\" ");
-      html.append("onclick=\"inputClick(this,'"+cgFormFieldEntity.getDictText()+"','"+cgFormFieldEntity.getDictTable()+"');\" ");
+
+      html.append("onclick=\"popupClick(this,'"+cgFormFieldEntity.getDictText()+"','"+cgFormFieldEntity.getDictField()+"','"+cgFormFieldEntity.getDictTable()+"');\" ");
+
       if("Y".equals(cgFormFieldEntity.getIsNull())){
     	  html.append("ignore=\"ignore\" ");
       }

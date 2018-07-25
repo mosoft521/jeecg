@@ -79,7 +79,13 @@ function browseFolder(path) {
 		<tr>
 			<td align="right"><label class="Validform_label"> 主表名: </label></td>
 			<td class="value" colspan="3"><input disabled="disabled" class="inputxt" id="tableName_tmp" name="tableName_tmp" value="${cgFormHeadPage.tableName}" datatype="*"> <span
-				class="Validform_checktip"></span></td>
+				class="Validform_checktip"></span>
+				<div style="display:inline-block">
+					<span>树形列表: </span>
+					<input disabled type="radio" name="supportTree" <c:if test="${cgFormHeadPage.isTree eq 'Y'}">checked="checked"</c:if> value="1"/>是
+					<input disabled type="radio" name="supportTree" <c:if test="${cgFormHeadPage.isTree eq 'N'}">checked="checked"</c:if> value="0"/>否
+				</div>
+			</td>
 		</tr>
 		<tr>
 			<td align="right"><label class="Validform_label"> 主表实体名(首字母大写): </label></td>
@@ -94,9 +100,23 @@ function browseFolder(path) {
 			<td class="value"><input class="inputxt" id="entityPackage" name="entityPackage" datatype="*"> <span class="Validform_checktip"></span></td>
 		</tr>
 		<tr>
+			<td align="right"><label class="Validform_label"> 模板类型: </label></td>
+			<td class="value" colspan="3">
+			<input type = "radio"   name="version" datatype="*" value="ext" >老版本模板(IE8+/不支持移动/标签列表)
+			<input type = "radio"   name="version" value="ext-common" checked="checked">新一代模板(IE10+/移动支持/Bootstrap/Vue/支持原生态列表)
+			<span class="Validform_checktip"></span></td>
+		</tr>
+		<tr>
+			<td align="right"><label class="Validform_label"> 是否支持Restful: </label></td>
+			<td class="value" colspan="3">
+			<input type = "radio" name="supportRestful" value="1"/>是
+			<input type = "radio" name="supportRestful" checked="checked" value="0"/>否
+			</td>
+		</tr>
+		<tr>
 			<td align="right"><label class="Validform_label"> 页面风格: </label></td>
 			<td class="value">
-			<select id="jspMode" name="jspMode">
+			<select id="jspMode" name="jspMode" style="width: 300px" datatype="*">
 		     		<c:forEach items="${jspModeList }" var="style">
 			     	 <option value="${style.code }" >${style.desc }</option>
 			     	</c:forEach>
@@ -134,3 +154,40 @@ function browseFolder(path) {
 	</table>
 </t:formvalid>
 </body>
+<script type="text/javascript">
+$(function(){
+	$("input[name='version']").change(function(){
+		var type = "onetomany";
+		var version = this.value;
+		getSingleTemplate(type,version,'');
+	});
+});
+//获取表单风格模板名称
+function getSingleTemplate(type,version,supportTree){
+	if(!supportTree){
+		supportTree = $("input[name='supportTree']:checked").val();
+	}
+	$.ajax({
+		url:"${pageContext.request.contextPath}/generateController.do?getOnlineTempletStyle",
+		type:"post",
+		data:{
+			type:type,
+			version:version,
+			supportTree:supportTree
+		},
+		dataType:"json",
+		success:function(data){
+			if(data.success){
+				$("#jspMode").empty();
+				//$("#jspMode").append("<option value='' ><t:mutiLang langKey="common.please.select"/></option>");
+				$.each(data.obj,function(i,tem){
+					$("#jspMode").append("<option value='"+tem.code+"' >"+tem.desc+"</option>");
+				});
+			}else{
+				$("#jspMode").empty();
+			}
+		}
+	});
+}
+</script>
+</html>

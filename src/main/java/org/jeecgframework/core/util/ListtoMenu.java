@@ -413,9 +413,7 @@ public class ListtoMenu {
 		}
 		menuString.append("<li iconCls=\"");
 		menuString.append(icon);
-
-		menuString.append("\"> <a onclick=\"addTab4MenuId(\'");
-
+		menuString.append("\"> <a onclick=\"addTab(\'");
 		menuString.append(getMutiLang(function.getFunctionName()));
 		menuString.append("\',\'");
 		menuString.append(function.getFunctionUrl());
@@ -434,10 +432,6 @@ public class ListtoMenu {
 
 		menuString.append("\',\'");
 		menuString.append(icon);
-
-		menuString.append("\',\'");
-		menuString.append(function.getId());
-
 		menuString.append("\')\"  title=\"");
 		menuString.append(getMutiLang(function.getFunctionName()));
 		menuString.append("\" url=\"");

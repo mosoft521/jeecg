@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,6 +32,8 @@ import org.jeecgframework.web.system.pojo.base.TSNoticeAuthorityUser;
 import org.jeecgframework.web.system.pojo.base.TSNoticeReadUser;
 import org.jeecgframework.web.system.pojo.base.TSRole;
 import org.jeecgframework.web.system.pojo.base.TSUser;
+import org.jeecgframework.web.system.service.NoticeAuthorityRoleServiceI;
+import org.jeecgframework.web.system.service.NoticeAuthorityUserServiceI;
 import org.jeecgframework.web.system.service.NoticeService;
 import org.jeecgframework.web.system.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,10 @@ public class NoticeController extends BaseController{
 	
 	@Autowired
 	private NoticeService noticeService;
-
 	@Autowired
-	private NoticeAuthorityRoleController noticeAuthorityRoleController;
+	private NoticeAuthorityRoleServiceI noticeAuthorityRoleService;
 	@Autowired
-	private NoticeAuthorityUserController noticeAuthorityUserController;
-
+	private NoticeAuthorityUserServiceI noticeAuthorityUserService;
 
 	@Autowired
 	public void setSystemService(SystemService systemService) {
@@ -80,7 +79,6 @@ public class NoticeController extends BaseController{
 		AjaxJson j = new AjaxJson();
 		try {
 			TSUser user = ResourceUtil.getSessionUser();
-
 			String sql = "SELECT notice.*,noticeRead.is_read as is_read FROM t_s_notice notice "
 					+ "LEFT JOIN t_s_notice_read_user noticeRead ON  notice.id = noticeRead.notice_id "
 					+ "WHERE noticeRead.del_flag = 0 and noticeRead.user_id = '"+user.getId()+"' ";
@@ -91,7 +89,6 @@ public class NoticeController extends BaseController{
 			}
 			sql += " ORDER BY noticeRead.create_time DESC ";		
 			List<Map<String, Object>> noticeList =  systemService.findForJdbc(sql,1,10);
-
 			
 			//将List转换成JSON存储
 			JSONArray result = new JSONArray();
@@ -118,7 +115,6 @@ public class NoticeController extends BaseController{
 					+ "LEFT JOIN t_s_notice_read_user noticeRead ON  notice.id = noticeRead.notice_id "
 					+ "WHERE noticeRead.del_flag = 0 and noticeRead.user_id = '"+user.getId()+"' "
 					+ "and noticeRead.is_read = 0";
-
 			List<Map<String, Object>> resultList2 =  systemService.findForJdbc(sql2);
 			Object count = resultList2.get(0).get("count");
 			j.setObj(count);
@@ -149,10 +145,9 @@ public class NoticeController extends BaseController{
 		if (StringUtil.isNotEmpty(notice.getId())) {
 			notice = this.systemService.getEntity(TSNotice.class, notice.getId());
 			request.setAttribute("notice", notice);
-
 			TSUser user = ResourceUtil.getSessionUser();
-			String hql = "from TSNoticeReadUser where noticeId = '"+notice.getId()+"' and userId = '"+user.getId()+"'";
-			List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql);
+			String hql = "from TSNoticeReadUser where noticeId = ? and userId = ?";
+			List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql,notice.getId(),user.getId());
 			if (noticeReadList != null && !noticeReadList.isEmpty()) {
 				TSNoticeReadUser readUser = noticeReadList.get(0);
 				if(readUser.getIsRead() == 0){
@@ -160,7 +155,6 @@ public class NoticeController extends BaseController{
 					systemService.saveOrUpdate(readUser);
 				}
 			}
-
 		}
 		return new ModelAndView("system/notice/noticeinfo");
 	}
@@ -179,7 +173,7 @@ public class NoticeController extends BaseController{
 //			//查询条件组装器
 //			org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq, notice, request.getParameterMap());
 //			this.noticeService.getDataGridReturn(cq, true);
-
+			
 			TSUser user = ResourceUtil.getSessionUser();
 			String sql = "SELECT notice.*,noticeRead.is_read as is_read FROM t_s_notice notice "
 					+ " LEFT JOIN t_s_notice_read_user noticeRead ON  notice.id = noticeRead.notice_id "
@@ -188,7 +182,6 @@ public class NoticeController extends BaseController{
 			
 			List<Map<String, Object>> resultList =  systemService.findForJdbc(sql,dataGrid.getPage(),dataGrid.getRows());
 			//将List转换成JSON存储
-
 			List<Map<String, Object>> noticeList = new ArrayList<Map<String, Object>>();
 			if(resultList!=null && resultList.size()>0){
 				for(int i=0;i<resultList.size();i++){
@@ -202,14 +195,12 @@ public class NoticeController extends BaseController{
 					noticeList.add(n);	
 				}
 			}
-
 	
 			dataGrid.setResults(noticeList);
 			String getCountSql ="SELECT count(notice.id) as count FROM t_s_notice notice LEFT JOIN t_s_notice_read_user noticeRead ON  notice.id = noticeRead.notice_id "
 					+ "WHERE noticeRead.del_flag = 0 and noticeRead.user_id = '"+user.getId()+"' and noticeRead.is_read = 0";
 			List<Map<String, Object>> resultList2 =  systemService.findForJdbc(getCountSql);
 			Object count = resultList2.get(0).get("count");
-
 			dataGrid.setTotal(Integer.valueOf(count.toString()));
 			TagUtil.datagrid(response, dataGrid);
 	}
@@ -284,17 +275,15 @@ public class NoticeController extends BaseController{
 		tSNotice = systemService.getEntity(TSNotice.class, tSNotice.getId());
 		message = "通知公告删除成功";
 		try{
-
 			if("2".equals(tSNotice.getNoticeLevel())){
-				String sql = "delete from t_s_notice_authority_role where notice_id = '"+tSNotice.getId()+"'";
-				systemService.executeSql(sql);
+				String sql = "delete from t_s_notice_authority_role where notice_id = ?";
+				systemService.executeSql(sql,tSNotice.getId());
 			}else if("3".equals(tSNotice.getNoticeLevel())){
-				String sql = "delete from t_s_notice_authority_user where notice_id = '"+tSNotice.getId()+"'";
-				systemService.executeSql(sql);
+				String sql = "delete from t_s_notice_authority_user where notice_id = ?";
+				systemService.executeSql(sql,tSNotice.getId());
 			}
-			String sql = "delete from t_s_notice_read_user where notice_id = '"+tSNotice.getId()+"'";
-			systemService.executeSql(sql);
-
+			String sql = "delete from t_s_notice_read_user where notice_id = ?";
+			systemService.executeSql(sql,tSNotice.getId());
 			noticeService.delete(tSNotice);
 			systemService.addLog(message, Globals.Log_Type_DEL, Globals.Log_Leavel_INFO);
 		}catch(Exception e){
@@ -346,7 +335,6 @@ public class NoticeController extends BaseController{
 		AjaxJson j = new AjaxJson();
 		message = "通知公告添加成功";
 		try{
-
 			Serializable noticeSerializable = noticeService.save(tSNotice);
 			if("1".equals(tSNotice.getNoticeLevel())){
 				//全员进行授权
@@ -356,8 +344,8 @@ public class NoticeController extends BaseController{
 					public void run() {
 						List<TSUser> userList = systemService.findHql("from TSUser");
 						for (TSUser user : userList) {
-							String hql = "from TSNoticeReadUser where noticeId = '"+noticeId+"' " + " and userId = '"+user.getId()+"'";
-							List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql);
+							String hql = "from TSNoticeReadUser where noticeId = ? and userId = ?";
+							List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql,noticeId,user.getId());
 							if(noticeReadList == null || noticeReadList.isEmpty()){
 								TSNoticeReadUser readUser = new TSNoticeReadUser();
 								readUser.setCreateTime(new Date());
@@ -377,7 +365,6 @@ public class NoticeController extends BaseController{
 					}
 				});
 			}
-
 			if ("2".equals(tSNotice.getNoticeLevel())) {
 				clearRole(tSNotice.getId(),request);
 				String roleid[]=request.getParameter("roleid").split(",");
@@ -387,7 +374,7 @@ public class NoticeController extends BaseController{
 					TSRole role=new TSRole();
 					role.setId(roleid[i]);
 					noticeAuthorityRole.setRole(role);
-					this.noticeAuthorityRoleController.doSave(noticeAuthorityRole,request);
+					this.noticeAuthorityRoleService.saveTSNoticeAuthorityRole(noticeAuthorityRole);
 				}
 			}else if ("3".endsWith(tSNotice.getNoticeLevel())) {
 				clearUser(tSNotice.getId(),request);
@@ -398,10 +385,9 @@ public class NoticeController extends BaseController{
 					TSUser tsUser=new TSUser();
 					tsUser.setId(userid[i]);
 					noticeAuthorityUser.setUser(tsUser);
-					this.noticeAuthorityUserController.doSave(noticeAuthorityUser,request);
+					this.noticeAuthorityUserService.saveNoticeAuthorityUser(noticeAuthorityUser);
 				}
 			}
-
 			systemService.addLog(message, Globals.Log_Type_INSERT, Globals.Log_Leavel_INFO);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -427,7 +413,6 @@ public class NoticeController extends BaseController{
 		TSNotice t = noticeService.get(TSNotice.class, tSNotice.getId());
 		
 		try {
-
 			if("1".equals(tSNotice.getNoticeLevel()) && !t.getNoticeLevel().equals(tSNotice.getNoticeLevel())){
 				clearRole(tSNotice.getId(),request);
 				clearUser(tSNotice.getId(),request);
@@ -439,8 +424,8 @@ public class NoticeController extends BaseController{
 					public void run() {
 						List<TSUser> userList = systemService.findHql("from TSUser");
 						for (TSUser user : userList) {
-							String hql = "from TSNoticeReadUser where noticeId = '"+noticeId+"' " + " and userId = '"+user.getId()+"'";
-							List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql);
+							String hql = "from TSNoticeReadUser where noticeId = ? and userId = ?";
+							List<TSNoticeReadUser> noticeReadList = systemService.findHql(hql,noticeId,user.getId());
 							if(noticeReadList == null || noticeReadList.isEmpty()){
 								TSNoticeReadUser readUser = new TSNoticeReadUser();
 								readUser.setCreateTime(new Date());
@@ -460,10 +445,9 @@ public class NoticeController extends BaseController{
 					}
 				});
 			}else if (!"1".equals(tSNotice.getNoticeLevel())&& "1".equals(t.getNoticeLevel()) ){
-					String sql = "delete from t_s_notice_read_user where notice_id = '"+t.getId()+"' ";
-					systemService.executeSql(sql);
+					String sql = "delete from t_s_notice_read_user where notice_id = ?";
+					systemService.executeSql(sql,t.getId());
 			}
-
 			MyBeanUtils.copyBeanNotNull2Bean(tSNotice, t);
 			noticeService.saveOrUpdate(t);
 
@@ -478,7 +462,7 @@ public class NoticeController extends BaseController{
 					TSRole role=new TSRole();
 					role.setId(roleid[i]);
 					noticeAuthorityRole.setRole(role);
-					this.noticeAuthorityRoleController.doSave(noticeAuthorityRole,request);
+					this.noticeAuthorityRoleService.saveTSNoticeAuthorityRole(noticeAuthorityRole);
 				}
 			}else if ("3".equals(tSNotice.getNoticeLevel())) {
 				clearRole(tSNotice.getId(),request);
@@ -491,10 +475,9 @@ public class NoticeController extends BaseController{
 					TSUser tsUser=new TSUser();
 					tsUser.setId(userid[i]);
 					noticeAuthorityUser.setUser(tsUser);
-					this.noticeAuthorityUserController.doSave(noticeAuthorityUser,request);
+					this.noticeAuthorityUserService.saveNoticeAuthorityUser(noticeAuthorityUser);
 				}
 			}
-
 
 			systemService.addLog(message, Globals.Log_Type_UPDATE, Globals.Log_Leavel_INFO);
 		} catch (Exception e) {
@@ -505,13 +488,13 @@ public class NoticeController extends BaseController{
 		j.setMsg(message);
 		return j;
 	}
-
+	
 	private void clearUser(String id,HttpServletRequest request){
 		TSNoticeAuthorityUser user=new TSNoticeAuthorityUser();
 		user.setNoticeId(id);
-			List<TSNoticeAuthorityUser>users=systemService.findByExample(TSNoticeAuthorityUser.class.getName(),user);
+		List<TSNoticeAuthorityUser> users =systemService.findByExample(TSNoticeAuthorityUser.class.getName(),user);
 		for (int i = 0; i < users.size(); i++) {
-			this.noticeAuthorityUserController.doDel(users.get(i),request);
+			this.noticeAuthorityUserService.doDelNoticeAuthorityUser(users.get(i));
 		}
 
 	}
@@ -520,11 +503,10 @@ public class NoticeController extends BaseController{
 		role.setNoticeId(id);
 		List<TSNoticeAuthorityRole>roles=systemService.findByExample(TSNoticeAuthorityRole.class.getName(),role);
 		for (int i = 0; i < roles.size(); i++) {
-			this.noticeAuthorityRoleController.doDel(roles.get(i),request);
+			this.noticeAuthorityRoleService.doDelTSNoticeAuthorityRole(roles.get(i));
 		}
 
 	}
-
 	
 	/**
 	 * 通知公告新增页面跳转
@@ -579,8 +561,6 @@ public class NoticeController extends BaseController{
 				req.setAttribute("usersid",usersid);
 				req.setAttribute("usersName",usersName);
 			}
-
-
 		}
 		return new ModelAndView("system/notice/tSNotice-update");
 	}

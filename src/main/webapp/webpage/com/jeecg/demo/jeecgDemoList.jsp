@@ -6,18 +6,21 @@
   <t:datagrid name="jeecgDemoList" checkbox="true" sortName="birthday,name" pagination="true" fitColumns="false" title="jeecg_demo" 
   	  superQuery="true" actionUrl="jeecgListDemoController.do?datagrid" idField="id" fit="true" queryMode="group" filter="true">
     <t:dgCol title="id"  field="id"   hidden="true"   queryMode="group"  width="120"></t:dgCol>
-    <t:dgCol title="名称"  field="name" query="true" autocomplete="true"   width="120"></t:dgCol>
-    <t:dgCol title="年龄"  extend="{style:'width:50px'}" formatterjs="formatAgeFun"  style="background-color:#3a87ad_50,background-color:#f89406_100" editor="numberbox" field="age"  query="true" width="120"></t:dgCol>
+    <t:dgCol title="名称" frozenColumn="true" field="name" query="true" autocomplete="true"  width="120" extend="{style:'width:120px'}"></t:dgCol>
+    
+    <!-- 字段 formatterjs 例子 -->
+    <t:dgCol title="年龄" frozenColumn="true" extend="{style:'width:70px'}" formatterjs="formatAgeFun"  style="background-color:#3a87ad_50,background-color:#f89406_100" editor="numberbox" field="age"  query="true" width="120"></t:dgCol>
     
     <t:dgCol title="生日"  hidden="true"  field="birthday" formatter="yyyy-MM-dd"   queryMode="group"  width="120"></t:dgCol>
-    <t:dgCol title="部门"  field="depId" query="true" queryMode="single" dictionary="t_s_depart,id,departname"  width="120"></t:dgCol>
-    <t:dgCol title="部门code" field="extField"></t:dgCol>
-    <t:dgCol title="性别"  field="sex"  query="true" showMode="radio" dictionary="sex" width="120" extendParams="styler:fmtype"></t:dgCol>
+    <t:dgCol title="部门"  frozenColumn="true" field="depId" query="true" queryMode="single" dictionary="t_s_depart,id,departname"  width="120"></t:dgCol>
+    <t:dgCol title="部门编码(拓展字段)" frozenColumn="true" field="extField"></t:dgCol>
+    <t:dgCol title="性别"  field="sex"  frozenColumn="true" query="false" showMode="radio" dictionary="sex" width="120" extendParams="styler:fmtype"></t:dgCol>
     <t:dgCol title="电话"  field="phone" queryMode="group"  width="120"></t:dgCol>
-    <t:dgCol title="工资"  field="salary" query="true" queryMode="group" width="120"></t:dgCol>
+    <t:dgCol title="工资"  field="salary" query="false" queryMode="group" width="120"></t:dgCol>
     <t:dgCol title="创建日期"  field="createDate" formatter="yyyy-MM-dd" query="true" queryMode="group" editor="datebox" width="120"></t:dgCol>
+    <!-- 列表查询条件popup例子 -->
     <t:dgCol title="邮箱"  field="email" query="true"  popup="true" dictionary="user_msg,realname,realname" width="120"></t:dgCol>
-    <t:dgCol title="入职状态"  field="status" query="true" extend="{style:{width:'300px';color:'red'};datatype:'*';}" defaultVal='N'  dictionary="sf_yn" width="80"></t:dgCol>
+    <t:dgCol title="入职状态"  field="status" query="false" extend="{style:{width:'300px';color:'red'};datatype:'*';}" defaultVal='N'  dictionary="sf_yn" width="80"></t:dgCol>
     <t:dgCol title="个人介绍"  field="content"  hidden="true"   queryMode="group"  width="500"></t:dgCol>
    <t:dgCol title="头像"  field="touxiang"   queryMode="group"  formatterjs="statusFmt" width="60"></t:dgCol>
     <t:dgCol title="创建人id"  field="createBy"  hidden="true"  queryMode="group"  width="120"></t:dgCol>
@@ -44,13 +47,12 @@
   </div>
  </div>
  <script type="text/javascript">
-
+ 	//列表显示自定义样式，显示对号
 	function statusFmt(value, row, index){  
 		if (value != null && value != '') 
 			return '<span style="color:green;font-size: 16px;">✔</span>';
 		return '<span style="color:red;font-size: 16px;">x</span>';
 	} 
-
 	//列表字段颜色 demo,逻辑判断函数 
 	function fmtype(val,row,index){
 	    //可添加更多CSS样式
@@ -76,17 +78,15 @@
 	}
 	
 function addWithbtn(title,addurl,gname,width,height){
-	//createdetailwindow("添加", addurl,770);
 	openwindow("添加",addurl,gname,770,500);
 	
 }
-
+// formatterjs 例子--------------------
 //单元格的格式化函数  value：字段的值 row：行的记录数据 index：行的索引
 function formatAgeFun(age,row,index){
 	var str="原："+age+",现 ："+(Number(age)+20);
 	return str;
 }
-
 
 //打开tab页面
 function addbytab(){
@@ -108,12 +108,6 @@ function ExportXlsByT() {
 	JeecgExcelExport("jeecgListDemoController.do?exportXlsByT","jeecgDemoList");
 }
 function createwindow_form(title, addurl,width,height) {
-	//width = width?width:700;
-	//height = height?height:400;
-	//if(width=="100%" || height=="100%"){
-	//	width = window.top.document.body.offsetWidth;
-	//	height =window.top.document.body.offsetHeight-100;
-	//}
 	width = window.top.document.body.offsetWidth;
 	height = window.top.document.body.offsetHeight-100;
 	if(typeof(windowapi) == 'undefined'){

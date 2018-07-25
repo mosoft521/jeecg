@@ -1,25 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
-
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!--360浏览器优先以webkit内核解析-->
-
-
     <title>Jeecg 微云快速开发平台</title>
 
     <link rel="shortcut icon" href="images/favicon.ico">
-    <link href="plug-in-ui/hplus/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
-    <link href="plug-in-ui/hplus/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="plug-in/hplus/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="plug-in/hplus/css/font-awesome.css?v=4.4.0" rel="stylesheet">
 
-    <link href="plug-in-ui/hplus/css/animate.css" rel="stylesheet">
-    <link href="plug-in-ui/hplus/css/style.css?v=4.1.0" rel="stylesheet">
-
-
+    <link href="plug-in/hplus/css/animate.css" rel="stylesheet">
+    <link href="plug-in/hplus/css/style.css?v=4.1.0" rel="stylesheet">
 </head>
 
 <body class="gray-bg">
@@ -47,7 +41,7 @@
         </h2>
         <p>JEECG是一款基于代码生成器的J2EE快速开发平台，开源界“小普元”超越传统商业企业级开发平台。引领新的开发模式(Online Coding模式(自定义表单)->代码生成器模式->手工MERGE智能开发)， 可以帮助解决Java项目60%的重复工作，让开发更多关注业务逻辑。既能快速提高开发效率，帮助公司节省人力成本，同时又不失灵活性。她可以用于所有的Web应用程序，如:<b>MIS</b>，<b>CRM</b>，<b>OA</b>，<b>ERP</b>，<b>CMS</b>，<b>网站后台</b>，<b>微信管家</b>，等等，当然，您也可以对她进行深度定制，以做出更强系统。</p>
         <p>
-            <b>当前版本：</b>v_3.7.3
+            <b>当前版本：</b>v_3.7.7
         </p>
         <p>
             <span class="label label-warning">开源     &nbsp; | &nbsp; 免费  | &nbsp; 更多插件</span>
@@ -55,13 +49,13 @@
         <br>
         <p>
         	<a class="btn btn-success btn-outline" href="http://yun.jeecg.org" target="_blank">
-                <i class="fa fa-cloud"></i> 云应用中心
+                <i class="fa fa-cloud"></i> JEECG插件下载
             </a>
-            <a class="btn btn-white btn-bitbucket" href="http://www.jeecg.org/" target="_blank">
+            <a class="btn btn-white btn-bitbucket" href="http://www.jeecg.org/forum.php?mod=viewthread&tid=1249&page=1&extra=#pid3689" target="_blank">
                 <i class="fa fa-qq"> </i> 联系我们
             </a>
-            <a class="btn btn-white btn-bitbucket" href="http://blog.csdn.net/zhangdaiscott" target="_blank">
-                <i class="fa fa-home"></i> 官方博客
+            <a class="btn btn-white btn-bitbucket" href="http://jeecg3.mydoc.io" target="_blank">
+                <i class="fa fa-home"></i> 在线文档
             </a>
         </p>
     </div>
@@ -132,13 +126,229 @@
                 <div class="ibox-content no-padding">
                     <div class="panel-body">
                         <div class="panel-group" id="version">
+                        
+                        <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h5 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#version" href="#v55">v3.7.7</a><code class="pull-right">2018.07.16</code>
+                                    </h5>
+                                </div>
+                                <div id="v55" class="panel-collapse collapse in">
+                                    <div class="panel-body">
+                                        <div class="alert alert-warning">此版本为性能和表单UI深化加强版本，简称闪电版本 （闪电般的速度，主流的Bootstrap表单风格）。平台性能访问速度提升至少3倍；表单提供Bootstrap风格极大提升美感和代码可控性，降低了表单的开发成本；</div>
+                                        <ol>
+											<li>【新功能】一套新的代码生成器模板，Bootstrap表单+EasyUI列表（单表、一对多）;</li>
+											<li>【新功能】一套新的代码生成器模板，Bootstrap表单+EasyUI原生列表（单表、一对多）;</li>
+											<li>【新功能】一套新的代码生成器模板， Boostrap表单+BootstapTable原生列表（单表、一对多）;</li>
+											<li>【新功能】一套新的代码生成器模板，Boostrap表单+BootstapTable标签列表（单表、一对多）;</li>
+											<li>【新功能】Online代码生成器，支持生成word模板方式生成 ;</li>
+											<li>【新功能】代码生成器优化，Restful接口代码生成，可选择;</li>
+											<li>【新功能】Jeasypoi提供例子，支持自定义导入字段转换规则;</li>
+											<li>【新功能】fineui风格首页，菜单支持折叠功能;</li>
+											<li>【新功能】字典值不支持排序，增加一个排序字段;</li>
+											<li>【新功能】UploadTag标签 ，支持自定义上传按钮高度宽度;</li>
+											<li>【bug】online 开发，自定义按钮显示表达式问题;</li>
+											<li>【bug】Online移动报表功能演示导出Excel报错;</li>
+											<li>【bug】新版代码生成器乱码问题;</li>
+											<li>【bug】SystemService.addLog( )的调用，第二个参数和第三个参数搞错了;</li>
+											<li>【bug】Online word 布局模板唯一值校验问题;</li>
+											<li>【bug】 一对多全tab、一对多带子表明细模板，不支持唯一校验处理;</li>
+											<li>【bug】online 数据库表导入功能,SqlServer下 字段类型生成错误、精度和小数点不正确、加载的表清单有多余系统表;</li>
+											<li>【bug】系统管理-二级管理员模块代码中SQL语法不兼容ORACLE;</li>
+											<li>【bug】字典组名带有空格情况下，点击查看字典值，js无效问题处理;</li>
+											<li>【bug】 basepath 问题 始终是127.0.0.1的错误bug;</li>
+											<li>【bug】Excel导出问题typecode 如果 带有下划线 就不能正确的检索数据字典表;</li>
+											<li>【bug】新版代码生成器没有处理js增强的生成 ;</li>
+											<li>【bug】新版代码生成器java增强逻辑的生成 ;</li>
+											<li>【bug】生成器生成去掉无用代码的生成，java增强，sql增强没有配置时不做生成相应代码 ;</li>
+											<li>【bug】Online报表配置 oracle时间处理bug</li>
+											<li>【bug】Online表单字段默认值，循环加了很多单引号问题;</li>
+											<li>【样式问题】Online table风格一对多，输入框上下太宽;</li>
+											<li>【样式问题】shortcut风格下表单时间控件高度兼容;</li>
+											<li>【样式问题】修改时间背景图片/修改下拉背景图片/下拉框高度;</li>
+											<li>【升级】VUE版本代码生成器模板改造优化;</li>
+											<li>【升级】改造pom.xml，删除不用的或者有子依赖的jar，依赖精简;</li>
+											<li>【升级】webUploadpath图片访问和下载服务，改造请求格式，实现浏览器缓存;</li>
+											<li>【升级】改造平台底层机制，提高平台性能，访问速度至少提升3倍;</li>
+											<li>【升级】列表数据加载重构，减少json解析重复转换的过程，提高列表数据加载速度;</li>
+											<li>【升级】字典缓存屏蔽不需要的属性，尽量少占内存;</li>
+											<li>【升级】重构缓存机制，采用缓存接口定义，支持Ehcache和redis 非常简单的切换;</li>
+											<li>【升级】 ztree 样式风格升级， 用户选择、部门选择的ztree样式替换等。;</li>
+											<li>【升级】SQL注入问题处理，Online报表自定义sql,以及查询条件处理重构成占位符;</li>
+											<li>【升级】online报表，参数和列查询条件同时支持的问题;</li>
+											<li>【升级】升级minidao，表达式混淆参数问题;</li>
+											<li>【升级】新版代码生成器一对多模板java增强逻辑支持;</li>
+											<li>【改进】数据列表，查询规则友好提醒;</li>
+											<li>【改进】online图形报表在线效果图标美化;</li>
+											<li>【改进】online风格样式，一对多全tab风格优化;</li>
+											<li>【改进】online报表 SQL支持上下文变量;</li>
+											<li>【改进】高级查询页面样式优化重构;</li>
+											<li>【改进】默认首页改为fineui风格;</li>
+											<li>【改进】 ace风格，输入框和select不对齐（online、代码生成器）;</li>
+											<li>【改进】字典名称长度太短;</li>
+											<li>【改进】Fineui首页， 兼容移动端;</li>
+											<li>【改造】online在线风格，boostrap 简约风格样式改造;</li>
+											<li>【改造】online在线风格，通用移动模板001 moblieCommon001;</li>
+											<li>【改造】代码进行重构，抽取，简化代码逻辑;</li>
+											<li>【改造】代码生成器生成代码，列表默认按照创建时间降序排列;</li>
+											<li>【改造】jeecg前段js 国际化改造，采用i18n技术实现;</li>
+											<li>【改造】上下布局表单二 ，上下拖动等问题修复;</li>
+											<li>【改造】UI标签，列表支持操作按钮折叠成组弹出展示，节省按钮列的空间;</li>
+											<li>【优化】online代码生成器模板优化,java增强，sql增强非空情况下不生成;</li>
+											<li>【优化】精简首页代码;</li>
+											<li>【优化】table模式字典性能，优化列表支持ajax异步处理数据值转换;</li>
+											<li>【改造】重构通知公告模块;</li>
+											<li>【改造】重构消息中心模块;</li>
+											<li>【改造】消息中间件优化;</li>
+											<li>【改造】日志打印格式错误，统一替换为slf4j日志方式;</li>
+											<li>【升级】老版本的代码生成器，原ace系列的模板，js引用全部改成标签方式;</li>
+											<li>【demo】下拉数据表格;</li>
+											<li>【demo】列表按钮折叠例子;</li>
+											<li>【demo】excel导入导出例子，支持导入字段值转换;</li>
+											<li>【demo】新UI控件效果demo;</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h5 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#version" href="#v54">v3.7.6</a><code class="pull-right">2018.06.06</code>
+                                    </h5>
+                                </div>
+                                <div id="v54" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="alert alert-warning">此版本提供新一代风格代码生成器模板，采用Vue技术，提供两套精美模板 ElementUI风格、Bootstrap风格，追逐潮流技术支持移动端；</div>
+                                        <ol>
+											<li>【功能升级】新一代 (单表/一对多) 代码生成器模板，Vue+ElementUI风格功能优化升级;</li>
+											<li>【功能升级】新一代 (单表) 代码生成器模板，Bootstrap表单+EasyUI原生态列表风格功能优化升级;</li>
+											<li>【功能升级】新一代 (一对多) 代码生成器模板，ElementUI表单+EasyUI原生态列表风格功能优化升级;</li>
+											<li>【功能升级】新一代 (一对多) 代码生成器模板，EasyUI标签列表上下布局(列表数据编辑)+Table风格表单功能优化升级;</li>
+											<li>【功能升级】牛牛叉功能  -> Datagrid标签升级,通过参数component可以快速实现BootstrapTable与easyUI列表风格切换功能优化升级;</li>
+											<li>【功能升级】定时任务支持版本升级;</li>
+											<li>【功能升级】定时任务，多个tomcat部署一台服务器的解决方案升级;</li>
+											<li>【功能改造】新版代码生成器模板文件扩展名题处理,扩展名统一增加字母“i”;</li>
+											<li>【功能改造】清理hplus/js/plugins下的插件;</li>
+											<li>【功能改造】将不常改的js组件放进jar包 jeecg-plugin-in,减少eclipse check js;</li>
+											<li>【功能改造】删除无用的代码，减少项目jar依赖;</li>
+											<li>【功能改造】提示信息停留时间延长;</li>
+											<li>【功能改造】防止SQL注入处理;</li>
+											<li>【功能改造】druid扫描排除资源修改,durid数据源配置优化;</li>
+											<li>【功能改造】权限拦截器重构优化</li>
+											<li>【功能改造】重构登录逻辑;</li>
+											<li>【功能改造】列表返回json进行gzip压缩，提高加载速度;</li>
+											<li>【功能改造】在线清空用户登录权限缓存;</li>
+											<li>【功能改造】重构redis缓存功能;</li>
+											<li>【功能改造】在线文档预览效果优化;</li>
+											<li>【功能改造】简化log4j12配置、highchart 图片导出依赖修改采用官仓;</li>
+											<li>【功能改造】演示demo效果优化;</li>
+											<li>【功能改造】jacob升级版本，采用官仓maven;</li>
+											<li>【功能改造】重构online报表，通用方法抽取统一维护[解析字典支持缓存、解析SQL字段、解析SQL字段参数]，优化UI效果;</li>
+											<li>【功能改造】重构webupload上传功能;</li>
+											<li>【功能改造】下拉默认请选择去掉，默认为空，美化页面效果;</li>
+											<li>【功能改造】bootstrap-table表单，列表按钮图标样式和ace，hplus保持统一;</li>
+											<li>【Demo】boostrap报表布局，嵌套多个报表示例;</li>
+											<li>【BUG】ElemetUI版本问题修正;</li>
+											<li>【BUG】naturebt代码生成器单表文件上传、excel导入，一对多验证settimeout问题修正;</li>
+											<li>【BUG】分布式部署不支持redis共享 集群部署问题修正;</li>
+											<li>【BUG】online删除文件confirm弹框z-index不足导致被遮挡;</li>
+											<li>【BUG】代码生成器radio，checkbox宽度样式修正;</li>
+											<li>【BUG】代码生成器多列表级联风格form页面带文件提交弹框不关闭问题修正;</li>
+											<li>【BUG】范围查询double类型字段错误问题;</li>
+											<li>【BUG】消息模板 查询按钮 改为 查看;</li>
+											<li>【BUG】多表头列表 审核弹框大小调整;</li>
+											<li>【BUG】部门二级管理员，部门角色在系统角色列表中显示问题修正;</li>
+											<li>【BUG】online扩展参数用法问题修正;</li>
+											<li>【BUG】UE编辑器图片 回显问题修正;</li>
+											<li>【BUG】图片上传blob类型报错问题修正;</li>
+											<li>【BUG】修改登录逻辑，解决重复执行login问题，简化代码;</li>
+											<li>【BUG】定时任务日志包冲突问题修正;</li>
+											<li>【BUG】替换官方仓库版本freemarker,采用classic_compatible=true解决空指针报错问题;</li>
+											<li>【BUG】黑名单数据排重处理;</li>
+											<li>【BUG】uploadify上传控件被隐藏导致上传失败问题修正;</li>
+											<li>【BUG】单表代码生成器，老版NOPOP风格 生成的代码查看功能存在提交按钮问题修正;</li>
+											<li>【BUG】合计金额展示千分位格式 如：61,100.00 显示问题修正;</li>
+											<li>【BUG】vue 采用validform校验，重复校验提交check不住问题修正;</li>
+											<li>【BUG】权限逻辑没有针对组织机构的角色进行控制问题修正;</li>
+											<li>【BUG】online开发,自定义按钮显示表达式不起作用问题修正;</li>
+											<li>【BUG】注释定时任务调度器启动解决抛出异常问题修正;</li>
+											<li>【BUG】element-ui 代码生成器遗留问题修正;</li>
+											<li>【BUG】数据字典项录入字典code重复校验问题修正;</li>
+											<li>【BUG】用户编辑页面，系统角色列表不需要显示接口角色信息;</li>
+											<li>【BUG】一系列论坛网友问题解决;</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h5 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#version" href="#v53">v3.7.5</a><code class="pull-right">2018.05.17</code>
+                                    </h5>
+                                </div>
+                                <div id="v53" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="alert alert-warning">此版本提供新一代风格代码生成器模板，采用Vue技术，提供两套精美模板 ElementUI风格、Bootstrap风格，追逐潮流技术支持移动端；</div>
+                                        <ol>
+											<li>【新增功能】新一代更灵活的代码生成器工厂，可灵活自定义生成的代码文件名称、路径等；根据模板结构生成代码文件;</li>
+											<li>【新增功能】新一代 (单表/一对多) 代码生成器模板，Vue+ElementUI风格;</li>
+											<li>【新增功能】新一代 (单表) 代码生成器模板，Bootstrap表单+EasyUI原生态列表风格;</li>
+											<li>【新增功能】新一代 (一对多) 代码生成器模板，ElementUI表单+EasyUI原生态列表风格;</li>
+											<li>【新增功能】新一代 (一对多) 代码生成器模板，EasyUI标签列表上下布局(列表数据编辑)+Table风格表单;</li>
+											<li>【功能升级】牛牛叉功能  -> Datagrid标签升级,通过参数component可以快速实现BootstrapTable与easyUI列表风格切换;</li>
+											<li>【新增功能】接口测试功能页面;</li>
+											<li>【新增功能】二维码生成功能;</li>
+											<li>【功能升级】多Tab风格（一对多）模板升级;</li>
+											<li>【功能升级】column列表字典属性扩展dictCondition加sql条件;</li>
+											<li>【功能升级】online表单、代码生成器树控件、上传控件升级优化;</li>
+											<li>【功能升级】树形代码生成器模板升级，列表支持多选;</li>
+											<li>【功能升级】ComboTree标签升级，增加是否只选择子节点属性控制，解决combotree树初始化子节点不能默认选择问题;</li>
+											<li>【功能升级】SelectZTree标签升级，增加父子联动选择机制;</li>
+											<li>【功能升级】代码生成器模板上传控件、树控件 宏封装;</li>
+											<li>【功能升级】mave依赖非jeecg官方的统一采用本地依赖方式，降低maven构建难度;</li>
+											<li>【功能改造】jeecg 用户账号字段改长一些;</li>
+											<li>【功能改造】高级查询弹出框样式;</li>
+											<li>【功能改造】跨域方案改造优化;</li>
+											<li>【功能改造】H+风格首页的依赖hplus插件，从jar中移到项目中，方便维护;</li>
+											<li>【功能改造】减重 Fineui demo 和plug-in删掉;</li>
+											<li>【功能改造】【UI标签扩展】上传新功能 （当限制上传数量为1的时候，上传新图片替换老的）;</li>
+											<li>【Demo】Vue bootstrap 示例;</li>
+											<li>【Demo】Vue elementUI 示例;</li>
+											<li>【Demo】bootstrapTable+ bootstrap表单 示例;</li>
+											<li>【BUG】在线Online开发，配置验证规则下拉不显示（360浏览器兼容模式问题）;</li>
+											<li>【BUG】一对多，列表带明细的模板，多个明细情况下展示有问题处理;</li>
+											<li>【BUG】ehcache.xml 总报端口冲突问题解决;</li>
+											<li>【BUG】popup,当字典Text为多个值时,查询条件的input框值为undefined;</li>
+											<li>【BUG】行编辑扩展参数字典值为空，模板报错问题处理;</li>
+											<li>【BUG】popup弹框出现在录入弹框后面的问题;</li>
+											<li>【BUG】范围查询double类型字段错误问题;</li>
+											<li>【BUG】Jeecg 新版3.7.3菜单加载慢问题解决;</li>
+											<li>【BUG】shortcut及经典下同名菜单冲突，只能点开一个问题;</li>
+											<li>【BUG】主子表关联问题;</li>
+											<li>【BUG】菜单修改bug，三级菜单编辑，不能改成一级菜单问题;</li>
+											<li>【BUG】角色授权，权限加载不出来问题;</li>
+											<li>【BUG】自定义表单js增强编辑报错处理;</li>
+											<li>【BUG】主键策略为NATIVE 再次编辑附表数据会被删除问题;</li>
+											<li>【BUG】online报表问题确认 其它数据源的时候，传进来的查询条件参数不会进行拼接问题;</li>
+											<li>【BUG】树状的数据列表添加checkbox后全选选不中;</li>
+											<li>【BUG】单表档案行编辑风格表单，代码生成，点击页面编辑所有的数据不可操作;</li>
+											<li>【BUG】自定义word模板，编辑页面不赋值问题修正;</li>
+											<li>【BUG】Excel导入导出功能bug;</li>
+											<li>【BUG】上传组件效果优化;</li>
+											<li>【BUG】一对多主子表关联外键的问题优化;</li>
+											<li>【BUG】fineUI 首页加载聊天插件时 菜单样式问题优化;</li>
+											<li>【BUG】一系列论坛网友问题解决;</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                        </div>
                         <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h5 class="panel-title">
                                         <a data-toggle="collapse" data-parent="#version" href="#v52">v3.7.3</a><code class="pull-right">2018.03.13</code>
                                     </h5>
                                 </div>
-                                <div id="v52" class="panel-collapse collapse in">
+                                <div id="v52" class="panel-collapse collapse">
                                     <div class="panel-body">
                                         <div class="alert alert-warning">此版本增加很多比较实用的功能，且UI样式进行进一步优化，极大提升UI美感，及加载速度！</div>
                                         <ol>
@@ -601,12 +811,12 @@
 </div>
 
 <!-- 全局js -->
-<script src="plug-in-ui/hplus/js/jquery.min.js?v=2.1.4"></script>
-<script src="plug-in-ui/hplus/js/bootstrap.min.js?v=3.3.6"></script>
-<script src="plug-in-ui/hplus/js/plugins/layer/layer.min.js"></script>
+<script src="plug-in/hplus/js/jquery.min.js?v=2.1.4"></script>
+<script src="plug-in/hplus/js/bootstrap.min.js?v=3.3.6"></script>
+<script src="plug-in/hplus/js/plugins/layer/layer.min.js"></script>
 
 <!-- 自定义js -->
-<script src="plug-in-ui/hplus/js/content.js"></script>
+<script src="plug-in/hplus/js/content.js"></script>
 </body>
 
 </html>

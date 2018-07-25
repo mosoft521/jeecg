@@ -32,7 +32,7 @@
 	</div>
 </div>
 <div region="center" style="padding:0px;border:0px">
-<t:datagrid superQuery="true" sortName="createDate" sortOrder="desc" name="tablePropertyList" title="smart.form.config" fitColumns="true" actionUrl="cgFormHeadController.do?datagrid" idField="id" fit="true" 
+<t:datagrid sortName="createDate" sortOrder="desc" name="tablePropertyList" title="smart.form.config" fitColumns="true" actionUrl="cgFormHeadController.do?datagrid" idField="id" fit="true" 
             queryMode="group" checkbox="true" btnCls="bootstrap">
 	<t:dgCol title="common.id" field="id" hidden="true"></t:dgCol>
 	<t:dgCol title="hasPeizhi" field="hasPeizhi" hidden="true"></t:dgCol>
@@ -97,10 +97,12 @@
 		});
 	}
 	function delCgForm(id,name){
-		$.dialog.confirm('<t:mutiLang langKey="confirm.delete.record"/>', function(){
+
+		$.dialog.confirm('<t:mutiLang langKey="confirm.online.delete.record"/>', function(){
 			checkIsExit(id,name);
 		}, function(){
 		}).zindex();
+
 	}
 	//检查这个表是否已经存在了
 	function checkIsExit(id,name){
@@ -426,6 +428,9 @@
 					var d = $.parseJSON(data);
 					if (d.success) {
 						tip(d.msg);
+
+						reloadTable();
+
 					}else{
 						tip(d.msg);
 					}

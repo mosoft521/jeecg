@@ -1,11 +1,20 @@
 package com.jeecg.demo.controller;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,12 +30,15 @@ import org.jeecgframework.core.common.model.json.ComboTree;
 import org.jeecgframework.core.common.model.json.DataGrid;
 import org.jeecgframework.core.common.model.json.TreeGrid;
 import org.jeecgframework.core.constant.Globals;
+import org.jeecgframework.core.enums.StoreUploadFilePathEnum;
 import org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil;
 import org.jeecgframework.core.util.DateUtils;
+import org.jeecgframework.core.util.HttpRequest;
 import org.jeecgframework.core.util.JSONHelper;
 import org.jeecgframework.core.util.MutiLangUtil;
 import org.jeecgframework.core.util.MyClassLoader;
 import org.jeecgframework.core.util.NumberComparator;
+import org.jeecgframework.core.util.ResourceUtil;
 import org.jeecgframework.core.util.StringUtil;
 import org.jeecgframework.core.util.oConvertUtils;
 import org.jeecgframework.tag.core.easyui.TagUtil;
@@ -43,9 +55,12 @@ import org.jeecgframework.web.system.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
@@ -72,11 +87,15 @@ public class JeecgFormDemoController extends BaseController {
 		return new ModelAndView("com/jeecg/demo/form_uitag");
 	}
 
+	/**
+	 * 二维码生成功能
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(params = "qrcode")
 	public ModelAndView qrcode(HttpServletRequest request) {
 		return new ModelAndView("com/jeecg/demo/form_QRCode");
 	}
-
 
 	@RequestMapping(params = "formValidDemo")
 	public ModelAndView formValidDemo(HttpServletRequest request) {
@@ -98,12 +117,30 @@ public class JeecgFormDemoController extends BaseController {
 		return new ModelAndView("com/jeecg/demo/form_nature");
 	}
 
+	@RequestMapping(params = "natures")
+	public ModelAndView topjuiDemo(HttpServletRequest request) {
+		return new ModelAndView("com/jeecg/demo/form_natures");
+	}
+
+
+	
+	
+	/**
+	 * 动态创建多tab demo，参考截图效果
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(params = "ueditor")
 	public ModelAndView ueditor(HttpServletRequest request) {
 		logger.info("ueditor");
 		return new ModelAndView("com/jeecg/demo/ueditor");
 	}
 
+	/**
+	 * popup赋多个值 demo
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(params = "popupMultiValue")
 	public ModelAndView popupMultiValue(HttpServletRequest request) {
 		logger.info("popupMultiValue");
@@ -221,9 +258,7 @@ public class JeecgFormDemoController extends BaseController {
 	 */
 	@RequestMapping(params = "getAutocompleteData",method ={RequestMethod.GET, RequestMethod.POST})
 	public void getAutocompleteData(HttpServletRequest request, HttpServletResponse response) {
-
 		String searchVal = request.getParameter("q");
-
 		String hql = "from TSUser where userName like '%"+searchVal+"%'";
 		List autoList = systemService.findHql(hql);
 		try {
@@ -243,17 +278,28 @@ public class JeecgFormDemoController extends BaseController {
 		}
 
 	}
-
+	
+	/**
+	 *  【demo】电子签章
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(params = "eSign")
 	public ModelAndView eSignDemo(HttpServletRequest request) {
 		return new ModelAndView("com/jeecg/demo/zsign");
 	}
 
+	/**
+	 * 左右布局demo
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(params = "siteSelect")
 	public ModelAndView siteSelect(HttpServletRequest request) {
 		logger.info("----左右布局 demo转入页面-----");
 		return new ModelAndView("com/jeecg/demo/siteSelect");
 	}	
+
 	/**
 	 * 上下特殊布局
 	 */
@@ -262,7 +308,11 @@ public class JeecgFormDemoController extends BaseController {
 		logger.info("----上下特殊布局 demo转入页面-----");
 		return new ModelAndView("com/jeecg/demo/specialLayout");
 	}
-
+	
+	/**
+	 * 通用上传demo
+	 * @return
+	 */
 	@RequestMapping(params = "commonUpload")
 	public ModelAndView commonUploadDemo(){
 		return new ModelAndView("system/commonupload/commonUploadFile");
@@ -277,13 +327,11 @@ public class JeecgFormDemoController extends BaseController {
 	public AjaxJson saveUploadFile(String documentTitle,String filename,String swfpath){
 		AjaxJson ajaxJson = new AjaxJson();
 		try {
-
 			if(StringUtil.isEmpty(filename)){
 				ajaxJson.setSuccess(false);
 				ajaxJson.setMsg("未上传文件");
 				return ajaxJson;
 			}
-
 			TSTypegroup tsTypegroup=systemService.getTypeGroup("fieltype","文档分类");
 			TSType tsType = systemService.getType("files","附件", tsTypegroup);
 			TSDocument document = new TSDocument();
@@ -293,11 +341,9 @@ public class JeecgFormDemoController extends BaseController {
 			document.setCreatedate(DateUtils.gettimestamp());
 			document.setTSType(tsType);
 			document.setSwfpath(swfpath);
-
 			String fileName = filename.substring(filename.lastIndexOf("/")+1,filename.lastIndexOf("."));
 			document.setAttachmenttitle(fileName);
 			document.setExtend(filename.substring(filename.lastIndexOf(".") + 1));
-
 			systemService.save(document);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -306,7 +352,7 @@ public class JeecgFormDemoController extends BaseController {
 		}
 		return ajaxJson;
 	}
-
+	
 
 
 	/**
@@ -335,7 +381,7 @@ public class JeecgFormDemoController extends BaseController {
 		}
 		return new ModelAndView("system/document/files");
 	}
-
+	
 	/**
 	 * 保存文件
 	 *
@@ -350,7 +396,6 @@ public class JeecgFormDemoController extends BaseController {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		TSTypegroup tsTypegroup=systemService.getTypeGroup("fieltype","文档分类");
 		TSType tsType = systemService.getType("files","附件", tsTypegroup);
-
 		String documentId = oConvertUtils.getString(request.getParameter("documentId"));// 文件ID
 		String documentTitle = oConvertUtils.getString(request.getParameter("documentTitle"));// 文件标题
 		if (StringUtil.isNotEmpty(documentId)) {
@@ -358,7 +403,6 @@ public class JeecgFormDemoController extends BaseController {
 			document = systemService.getEntity(TSDocument.class, documentId);
 			document.setDocumentTitle(documentTitle);
 		}
-
 		document.setSubclassname(MyClassLoader.getPackPath(document));
 		document.setCreatedate(DateUtils.gettimestamp());
 		document.setTSType(tsType);
@@ -381,8 +425,12 @@ public class JeecgFormDemoController extends BaseController {
 	 * 新闻法规文件列表
 	 */
 	@RequestMapping(params = "documentList")
-	public void documentList(HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
+	public void documentList(TSDocument document,HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
 		CriteriaQuery cq = new CriteriaQuery(TSDocument.class, dataGrid);
+		//查询条件组装器
+
+        org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq, document,request.getParameterMap());
+
 		String typecode = oConvertUtils.getString(request.getParameter("typecode"));
 		cq.createAlias("TSType", "TSType");
 		cq.eq("TSType.typecode", typecode);
@@ -411,7 +459,7 @@ public class JeecgFormDemoController extends BaseController {
 		j.setMsg(message);
 		return j;
 	}
-
+	
 	/**
 	 * 权限列表
 	 */
@@ -437,16 +485,15 @@ public class JeecgFormDemoController extends BaseController {
 		cq.addOrder("functionOrder", SortDirection.asc);
 		cq.add();
 
+		//--手工加载数据权限条件--------
 		//获取装载数据权限的条件HQL
 		cq = HqlGenerateUtil.getDataAuthorConditionHql(cq, new TSFunction());
 		cq.add();
 
-
 		List<TSFunction> functionList = systemService.getListByCriteriaQuery(cq, pageflag);
 		Long total=systemService.getCountForJdbc("select count(*) from t_s_function where functionlevel=0");
-
+		//菜单管理页面：菜单排序
 		Collections.sort(functionList, new NumberComparator());
-
 		List<TreeGrid> treeGrids = new ArrayList<TreeGrid>();
 		TreeGridModel treeGridModel = new TreeGridModel();
 		treeGridModel.setIcon("TSIcon_iconPath");
@@ -458,9 +505,8 @@ public class JeecgFormDemoController extends BaseController {
 		treeGridModel.setChildList("TSFunctions");
 		// 添加排序字段
 		treeGridModel.setOrder("functionOrder");
-
+		//添加菜单图标样式
 		treeGridModel.setIconStyle("functionIconStyle");
-
 
 		treeGridModel.setFunctionType("functionType");
 
@@ -486,7 +532,7 @@ public class JeecgFormDemoController extends BaseController {
 	public ModelAndView function(ModelMap model) {
 		return new ModelAndView("com/jeecg/demo/functionList");
 	}
-
+	
 	
 	/**
 	 * 菜单进入可排序多选界面
@@ -527,7 +573,7 @@ public class JeecgFormDemoController extends BaseController {
         this.systemService.getDataGridReturn(cq, true);
         TagUtil.datagrid(response, dataGrid);
 	}
-
+	
 	@RequestMapping(params = "ztreeDemo")
 	public ModelAndView ztreeDemo(HttpServletRequest request) {
 		return new ModelAndView("com/jeecg/demo/ztreeDemo");
@@ -578,14 +624,13 @@ public class JeecgFormDemoController extends BaseController {
 	public AjaxJson del(TSDepart depart, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		depart = systemService.getEntity(TSDepart.class, depart.getId());
-        Long childCount = systemService.getCountForJdbc("select count(1) from t_s_depart where parentdepartid ='" + depart.getId() + "'");
+        Long childCount = systemService.getCountForJdbcParam("select count(1) from t_s_depart where parentdepartid = ?", depart.getId());
         if(childCount>0){
         	j.setSuccess(false);
         	j.setMsg("有下级,不能删除");
         	return j;
         }
         systemService.executeSql("delete from t_s_role_org where org_id=?", depart.getId());
-        //systemService.delete();
         j.setMsg("删除成功");
 		return j;
 	}
@@ -603,4 +648,191 @@ public class JeecgFormDemoController extends BaseController {
 		logger.info("----选项卡demo转入页面-----");
 		return new ModelAndView("com/jeecg/demo/tabDemo");
 	}
+	
+	/**
+	 * 常用示例Demo:接口测试页面跳转
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(params = "interfaceTestDemo")
+	public ModelAndView interfaceTestDemo(HttpServletRequest request) {
+		logger.info("----接口测试demo转入页面-----");
+		return new ModelAndView("com/jeecg/demo/form_interfaceTestDemo");
+	}
+	
+	/**
+	 * 常用示例Demo:接口测试
+	 * @param request
+	 * @param response
+	 * @return AjaxJson
+	 */
+	@RequestMapping(params = "interfaceTest")
+	@ResponseBody
+	public AjaxJson testInterface(HttpServletRequest request,HttpServletResponse response) {
+			 AjaxJson j=new AjaxJson();
+		 try {
+			 String serverUrl = request.getParameter("serverUrl");//请求的地址
+			 String requestBody = request.getParameter("requestBody");//请求的参数
+			 String requestMethod = request.getParameter("requestMethod");//请求的方式
+				 if(requestMethod.equals("POST")){
+					 if(requestBody !=""){
+						 logger.info("----请求接口开始-----");
+						 JSONObject sendPost = HttpRequest.sendPost(serverUrl, requestBody);
+						 logger.info("----请求接口结束-----"+sendPost);
+						 j.setSuccess(true);
+						 j.setObj(sendPost.toJSONString());
+					 }else{
+						 j.setSuccess(false);
+						 j.setObj("请填写请求参数");
+					 }
+					 
+				 }
+				 if(requestMethod.equals("GET")){
+					  logger.info("----请求接口开始-----");
+					  JSONObject sendGet = HttpRequest.sendGet(serverUrl, requestBody);
+					  logger.info("----请求接口结束-----"+sendGet.toJSONString());
+					  j.setSuccess(true);
+					  j.setObj(sendGet);
+				 }
+		} catch (Exception e) {
+			j.setSuccess(false);
+			j.setObj("服务器请求失败");
+			e.printStackTrace();
+		}
+		return j;
+	}
+	
+	/**
+	 * Webupload上传
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(params = "webuploader")
+	public ModelAndView webuploader(HttpServletRequest request) {
+		logger.info("----webuploaderdemo-----");
+		return new ModelAndView("com/jeecg/demo/form_webuploader");
+	}
+	
+	/**
+	 * WebUploader
+	 * 文件上传处理
+	 */
+	@RequestMapping("/filedeal")
+    @ResponseBody
+    public AjaxJson filedeal(HttpServletRequest request, HttpServletResponse response) {
+        AjaxJson j = new AjaxJson();
+        String msg="";
+        String ctxPath=ResourceUtil.getConfigByName("webUploadpath");//demo中设置为D://upFiles,实际项目应因事制宜
+        try {
+        	String fileName = null;
+        	String bizType=request.getParameter("bizType");//上传业务名称
+        	String bizPath=StoreUploadFilePathEnum.getPath(bizType);//根据业务名称判断上传路径
+        	String nowday=new SimpleDateFormat("yyyyMMdd").format(new Date());
+    		File file = new File(ctxPath+"/"+bizPath+"/"+nowday);
+    		if (!file.exists()) {
+    			file.mkdirs();// 创建文件根目录
+    		}
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+            MultipartFile mf=multipartRequest.getFile("file");// 获取上传文件对象
+            String orgName = mf.getOriginalFilename();// 获取文件名
+    		fileName = String.valueOf(UUID.randomUUID().getMostSignificantBits()).replace("-", "")+ orgName.substring(orgName.lastIndexOf("."));
+    		String savePath = file.getPath() + "/" + fileName;
+    		File savefile = new File(savePath);
+    		FileCopyUtils.copy(mf.getBytes(), savefile);
+			msg="上传成功";
+			j.setMsg(msg);
+			String dbpath=bizPath+"/"+nowday+"/"+fileName;
+			Map<String,Object> info = new HashMap<String,Object>();
+			info.put("filename", orgName.substring(0,orgName.lastIndexOf(".")));
+			info.put("filesize", mf.getSize());
+			info.put("filetype", orgName.substring(orgName.lastIndexOf(".")));
+			info.put("filepath", dbpath);
+			j.setAttributes(info);
+        } catch (IOException e) {
+			j.setSuccess(false);
+			logger.info(e.getMessage());
+		}
+		j.setMsg(msg);
+        return j;
+    }
+	/**
+	 * 删除处理
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/filedelete")
+    @ResponseBody
+    public AjaxJson filedelete(HttpServletRequest request, HttpServletResponse response) {
+        AjaxJson j = new AjaxJson();
+        String msg="";
+        String ctxPath=ResourceUtil.getConfigByName("webUploadpath");//demo中设置为D://upFiles,实际项目应因事制宜
+        String path=request.getParameter("filepath");
+    	String delpath=ctxPath+"/"+path;
+    	File fileDelete = new File(delpath);
+		if (!fileDelete.exists() || !fileDelete.isFile()) {
+			msg="警告: " + delpath + "不存在!";
+			logger.info(msg);
+			j.setSuccess(true);//不存在前台也给他删除
+		}else{
+			if(fileDelete.delete()){
+				msg="--------成功删除文件---------"+delpath;
+				logger.info(msg);
+			}else{
+				j.setSuccess(false);
+				msg="没删除成功--jdk的问题还是你文件的问题请重新试试";
+				logger.info(msg);
+			}
+		}
+		j.setMsg(msg);
+        return j;
+    }
+	
+	@RequestMapping("/filedown")
+	public void getImgByurl(HttpServletResponse response,HttpServletRequest request) throws Exception{
+		String dbpath = request.getParameter("filepath");
+		if(oConvertUtils.isNotEmpty(dbpath)&&dbpath.endsWith(",")){
+			dbpath = dbpath.substring(0, dbpath.length()-1);
+		}
+		response.setContentType("application/x-msdownload;charset=utf-8");
+		String fileType = dbpath.substring(dbpath.lastIndexOf("."));
+		String fileName=request.getParameter("filename")+fileType;
+		String userAgent = request.getHeader("user-agent").toLowerCase();
+		if (userAgent.contains("msie") || userAgent.contains("like gecko") ) {
+			fileName = URLEncoder.encode(fileName, "UTF-8");
+		}else {  
+			fileName = new String(fileName.getBytes("UTF-8"), "iso-8859-1");  
+		} 
+		response.setHeader("Content-disposition", "attachment; filename="+ fileName);
+	
+		InputStream inputStream = null;
+		OutputStream outputStream=null;
+		try {
+			String localPath=ResourceUtil.getConfigByName("webUploadpath");
+			String imgurl = localPath+"/"+dbpath;
+			inputStream = new BufferedInputStream(new FileInputStream(imgurl));
+			outputStream = response.getOutputStream();
+			byte[] buf = new byte[1024];
+	        int len;
+	        while ((len = inputStream.read(buf)) > 0) {
+	            outputStream.write(buf, 0, len);
+	        }
+	        response.flushBuffer();
+		} catch (Exception e) {
+			logger.info("--通过流的方式获取文件异常--"+e.getMessage());
+		}finally{
+			if(inputStream!=null){
+				inputStream.close();
+			}
+			if(outputStream!=null){
+				outputStream.close();
+			}
+		}
+	}
+	
+	@RequestMapping(params = "dropDownDatagrid",method ={RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView dropDownDatagrid(HttpServletRequest request) {
+		return new ModelAndView("com/jeecg/demo/dropDownDatagrid");
+	}
+
 }

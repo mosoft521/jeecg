@@ -78,8 +78,9 @@
  </script>
  <body>
   <form id="formobj" action="${basePath}/cgFormBuildController.do?saveOrUpdateMore" name="formobj" method="post"><input type="hidden" id="btn_sub" class="btn_sub"/>
-	<#include "online/template/default/html/jformhead.ftl">
-			
+	<#-- update-begin-author:taoyan date:20180326 for:subgrid引入页面地址错误  -->
+	<#include "online/template/subgrid/html/jformhead.ftl">
+	<#-- update-end-author:taoyan date:20180326 for:subgrid引入页面地址错误  -->
 			
 <script type="text/javascript">
    $(function(){
@@ -142,8 +143,10 @@
   			}
   		}
   	}
-	$.dialog.setting.zIndex = getzIndex();
+	//update-begin-author：taoYan date:20180519 for:弹出层z-index不足被遮住--
 	function del(url,obj){
+		$.dialog.setting.zIndex = getzIndex();
+	//update-end-author：taoYan date:20180519 for:弹出层z-index不足被遮住--
 		$.dialog.confirm("确认删除该条记录?", function(){
 		  	$.ajax({
 				async : false,
@@ -174,9 +177,11 @@
 				<#list subtablelist as sub >
 				    <#if field['${sub}']?exists >
 				    	<#if field['${sub}'].head.relationType==1 >
-					    <#include "online/template/default/html/jformonetoone.ftl">
+			    		<#-- update-begin-author:taoyan date:20180327 for:subgrid引入页面地址错误  -->
+						<#include "online/template/subgrid/html/jformonetoone.ftl">
 					    <#else>
-					    <#include "online/template/default/html/jformonetomany.ftl">
+					    <#include "online/template/subgrid/html/jformonetomany.ftl">
+					    <#-- update-end-author:taoyan date:20180327 for:subgrid引入页面地址错误  -->
 					    </#if>
 					</#if>
 				</#list>
@@ -197,7 +202,9 @@
 		<#list subtablelist as sub >
 		    <#if field['${sub}']?exists >
 				<#if field['${sub}'].head.relationType!=1 >
-			    <#include "online/template/default/html/jformonetomanytpl.ftl">
+				<#-- update-begin-author:taoyan date:20180327 for:subgrid引入页面地址错误  -->
+				<#include "online/template/subgrid/html/jformonetomanytpl.ftl">
+				<#-- update-end-author:taoyan date:20180327 for:subgrid引入页面地址错误  -->				
 			    </#if>
 			</#if>
 		</#list>

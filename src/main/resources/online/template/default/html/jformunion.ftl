@@ -147,8 +147,10 @@
   			}
   		}
   	}
-	$.dialog.setting.zIndex = getzIndex();
+	//update-begin-author：taoYan date:20180519 for:弹出层z-index不足被遮住--
 	function del(url,obj){
+		$.dialog.setting.zIndex = getzIndex();
+	//update-end-author：taoYan date:20180519 for:弹出层z-index不足被遮住--
 		$.dialog.confirm("确认删除该条记录?", function(){
 		  	$.ajax({
 				async : false,
